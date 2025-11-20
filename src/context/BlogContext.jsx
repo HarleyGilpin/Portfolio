@@ -24,7 +24,7 @@ export const BlogProvider = ({ children }) => {
 
     const login = (password) => {
         // Simple password for demo purposes
-        if (password === 'admin123') {
+        if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
             setIsAdmin(true);
             return true;
         }
