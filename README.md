@@ -2,9 +2,7 @@
 
 A futuristic, modern portfolio website built with **React** and **Vite**. This project showcases professional experience, projects, and includes a fully functional blog with an admin dashboard.
 
-![Portfolio Preview](https://github.com/user-attachments/assets/b37f95b5-f715-4737-a592-7130b0bb411c)
-
-
+https://github.com/user-attachments/assets/b37f95b5-f715-4737-a592-7130b0bb411c
 
 ## 🚀 Features
 
