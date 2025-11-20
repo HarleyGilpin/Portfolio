@@ -14,9 +14,28 @@ const BlogPost = () => {
     }
 
     const sanitizedContent = DOMPurify.sanitize(post.content);
+    const [scrollProgress, setScrollProgress] = React.useState(0);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            const totalScroll = document.documentElement.scrollTop;
+            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scroll = `${totalScroll / windowHeight}`;
+            setScrollProgress(Number(scroll));
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
-        <div className="pt-4 pb-16 container mx-auto px-4">
+        <div className="pt-4 pb-16 container mx-auto px-4 relative">
+            {/* Scroll Progress Bar */}
+            <div
+                className="fixed top-0 left-0 h-1 bg-accent-primary z-[60]"
+                style={{ width: `${scrollProgress * 100}%` }}
+            />
+
             <SEO
                 title={post.title}
                 description={post.excerpt}

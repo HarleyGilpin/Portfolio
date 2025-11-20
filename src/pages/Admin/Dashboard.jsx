@@ -5,16 +5,25 @@ import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
 
+import { toast } from 'sonner';
+
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout } = useBlog();
     const [isEditing, setIsEditing] = useState(false);
     const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '' });
 
     const handleSave = () => {
+        if (!currentPost.title || !currentPost.content) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
         if (currentPost.id) {
             updatePost(currentPost.id, currentPost);
+            toast.success('Post updated successfully');
         } else {
             addPost(currentPost);
+            toast.success('Post created successfully');
         }
         setIsEditing(false);
         setCurrentPost({ title: '', content: '', excerpt: '' });
@@ -26,9 +35,18 @@ const Dashboard = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this post?')) {
-            deletePost(id);
-        }
+        toast('Are you sure you want to delete this post?', {
+            action: {
+                label: 'Delete',
+                onClick: () => {
+                    deletePost(id);
+                    toast.success('Post deleted');
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+            },
+        });
     };
 
     return (

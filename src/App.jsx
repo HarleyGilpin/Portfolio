@@ -14,10 +14,14 @@ import Login from './pages/Admin/Login';
 import Dashboard from './pages/Admin/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
+import { Toaster } from 'sonner';
+import NotFound from './pages/NotFound';
+
 function App() {
   return (
     <BlogProvider>
       <Router>
+        <Toaster position="top-center" theme="dark" richColors />
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
@@ -34,6 +38,7 @@ function App() {
               <Dashboard />
             </ProtectedRoute>
           } />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </BlogProvider>
