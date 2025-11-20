@@ -20,7 +20,7 @@ const Login = () => {
     };
 
     return (
-        <div className="pt-24 pb-16 container mx-auto px-4 flex justify-center items-center min-h-[60vh]">
+        <div className="pt-4 pb-16 container mx-auto px-4 flex justify-center items-center min-h-[60vh]">
             <SEO title="Admin Login" description="Login to access admin dashboard" />
             <div className="glass-panel p-8 w-full max-w-md">
                 <div className="flex justify-center mb-6">

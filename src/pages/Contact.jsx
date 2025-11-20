@@ -3,7 +3,7 @@ import { Mail, Linkedin, Send } from 'lucide-react';
 
 const Contact = () => {
     return (
-        <div className="pt-24 pb-16 container mx-auto px-4">
+        <div className="pt-4 pb-16 container mx-auto px-4">
             <h1 className="text-4xl font-bold mb-8 text-center"><span className="text-gradient">Get In Touch</span></h1>
 
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">

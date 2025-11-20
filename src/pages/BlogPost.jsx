@@ -16,7 +16,7 @@ const BlogPost = () => {
     const sanitizedContent = DOMPurify.sanitize(post.content);
 
     return (
-        <div className="pt-24 pb-16 container mx-auto px-4">
+        <div className="pt-4 pb-16 container mx-auto px-4">
             <SEO
                 title={post.title}
                 description={post.excerpt}

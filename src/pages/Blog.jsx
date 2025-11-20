@@ -8,7 +8,7 @@ const Blog = () => {
     const { posts } = useBlog();
 
     return (
-        <div className="pt-24 pb-16 container mx-auto px-4">
+        <div className="pt-4 pb-16 container mx-auto px-4">
             <SEO
                 title="Blog"
                 description="Thoughts and insights on software engineering, web development, and more."

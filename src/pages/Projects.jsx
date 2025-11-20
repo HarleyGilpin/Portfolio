@@ -13,7 +13,7 @@ const Projects = () => {
     ];
 
     return (
-        <div className="pt-24 pb-16 container mx-auto px-4">
+        <div className="pt-4 pb-16 container mx-auto px-4">
             <h1 className="text-4xl font-bold mb-12"><span className="text-gradient">Featured Projects</span></h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
