@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "preinstall": "npm config set legacy-peer-deps true"
+    "preview": "vite preview"
   },
   "dependencies": {
     "dompurify": "^3.3.0",
