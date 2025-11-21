@@ -10,14 +10,14 @@ const Projects = () => {
             description: "A RuneScape emulation project recreating the game as it was in 2011. Involves complex server-side logic and community management.",
             tags: ["Java", "Game Dev", "Community"],
             category: "Game Dev",
-            link: "https://2011.rs"
+            link: "https://github.com/2011Scape"
         },
         {
             title: "Portfolio Website",
             description: "A modern, futuristic portfolio website built with React and Vite, featuring a custom blog and admin dashboard.",
             tags: ["React", "Tailwind", "Vite"],
             category: "Web Dev",
-            link: "https://harleygilpin.com"
+            link: "https://github.com/HarleyGilpin/Portfolio"
         }
     ];
 
