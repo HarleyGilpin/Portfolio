@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import ImageResize from 'quill-image-resize-module-react';
+import BlotFormatter from 'quill-blot-formatter';
 import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
-Quill.register('modules/imageResize', ImageResize);
+Quill.register('modules/blotFormatter', BlotFormatter);
 
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout, adminToken } = useBlog();
@@ -19,15 +19,17 @@ const Dashboard = () => {
 
     const handleImageUpload = async (file) => {
         setIsUploading(true);
+        const toastId = toast.loading('Uploading image...');
         try {
             const newBlob = await upload(file.name, file, {
                 access: 'public',
                 handleUploadUrl: `/api/upload?auth=${adminToken}`,
             });
+            toast.success('Image uploaded successfully', { id: toastId });
             return newBlob.url;
         } catch (error) {
             console.error('Upload error:', error);
-            toast.error('Failed to upload image');
+            toast.error('Failed to upload image', { id: toastId });
             return null;
         } finally {
             setIsUploading(false);
@@ -111,10 +113,7 @@ const Dashboard = () => {
                 }
             }
         },
-        imageResize: {
-            parchment: Quill.import('parchment'),
-            modules: ['Resize', 'DisplaySize']
-        }
+        blotFormatter: {}
     }), []);
 
     return (
@@ -166,7 +165,7 @@ const Dashboard = () => {
                         />
                     </div>
 
-                    <div className="bg-white text-black rounded-lg overflow-hidden h-[300px] mb-12">
+                    <div className="bg-white text-black rounded-lg overflow-hidden h-[300px] mb-12 relative">
                         <ReactQuill
                             theme="snow"
                             value={currentPost.content}
@@ -174,6 +173,14 @@ const Dashboard = () => {
                             className="h-[250px]"
                             modules={modules}
                         />
+                        {isUploading && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                                <div className="bg-bg-primary px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-accent-primary border-t-transparent"></div>
+                                    <span className="text-sm font-medium">Uploading image...</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex gap-4 pt-4">
