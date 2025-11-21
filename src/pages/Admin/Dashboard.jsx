@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import ReactQuill from 'react-quill-new';
+import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import ImageResize from 'quill-image-resize-module-react';
 import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
+
+Quill.register('modules/imageResize', ImageResize);
 
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout, adminToken } = useBlog();
@@ -107,6 +110,10 @@ const Dashboard = () => {
                     };
                 }
             }
+        },
+        imageResize: {
+            parchment: Quill.import('parchment'),
+            modules: ['Resize', 'DisplaySize']
         }
     }), []);
 
