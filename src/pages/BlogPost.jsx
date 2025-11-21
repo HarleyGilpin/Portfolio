@@ -46,7 +46,7 @@ const BlogPost = () => {
                 <header className="mb-8 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
                     <p className="text-text-muted">
-                        {new Date(post.createdAt).toLocaleDateString()}
+                        {new Date(post.created_at).toLocaleDateString()}
                     </p>
                 </header>
 

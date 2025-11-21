@@ -26,7 +26,7 @@ const Blog = () => {
                                 </Link>
                             </h2>
                             <p className="text-sm text-text-muted">
-                                {new Date(post.createdAt).toLocaleDateString()}
+                                {new Date(post.created_at).toLocaleDateString()}
                             </p>
                         </div>
 
