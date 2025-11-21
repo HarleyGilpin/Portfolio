@@ -1,20 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Mail, Linkedin, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const form = useRef();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        setIsLoading(false);
-        toast.success('Message sent successfully! I will get back to you soon.');
-        e.target.reset();
+        try {
+            await emailjs.sendForm(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                form.current,
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+            );
+            toast.success('Message sent successfully! I will get back to you soon.');
+            e.target.reset();
+        } catch (error) {
+            console.error('EmailJS Error:', error);
+            const errorMessage = error.text || error.message || 'Unknown error';
+            toast.error(`Failed: ${errorMessage}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -52,11 +64,12 @@ const Contact = () => {
                 </div>
 
                 {/* Form */}
-                <form className="glass-panel p-8 space-y-6" onSubmit={handleSubmit}>
+                <form ref={form} className="glass-panel p-8 space-y-6" onSubmit={handleSubmit}>
                     <div>
                         <label className="block text-sm font-medium mb-2 text-text-secondary">Name</label>
                         <input
                             type="text"
+                            name="user_name"
                             required
                             className="w-full bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none transition-colors"
                             placeholder="Your Name"
@@ -66,6 +79,7 @@ const Contact = () => {
                         <label className="block text-sm font-medium mb-2 text-text-secondary">Email</label>
                         <input
                             type="email"
+                            name="user_email"
                             required
                             className="w-full bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none transition-colors"
                             placeholder="your@email.com"
@@ -74,6 +88,7 @@ const Contact = () => {
                     <div>
                         <label className="block text-sm font-medium mb-2 text-text-secondary">Message</label>
                         <textarea
+                            name="message"
                             rows="4"
                             required
                             className="w-full bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none transition-colors"
