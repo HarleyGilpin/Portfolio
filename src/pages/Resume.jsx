@@ -6,9 +6,14 @@ const Resume = () => {
         <div className="pt-4 pb-16 container mx-auto px-4">
             <div className="flex justify-between items-center mb-12">
                 <h1 className="text-4xl font-bold"><span className="text-gradient">Resume</span></h1>
-                <button className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center gap-2 transition-colors">
+                <a
+                    href="https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:79f1e38d-db9e-437c-93f7-957ce35f99e8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center gap-2 transition-colors"
+                >
                     <Download size={18} /> Download PDF
-                </button>
+                </a>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
