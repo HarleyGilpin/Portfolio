@@ -10,14 +10,14 @@ const Projects = () => {
             description: "A RuneScape emulation project recreating the game as it was in 2011. Involves complex server-side logic and community management.",
             tags: ["Java", "Game Dev", "Community"],
             category: "Game Dev",
-            link: "#"
+            link: "https://2011.rs"
         },
         {
             title: "Portfolio Website",
             description: "A modern, futuristic portfolio website built with React and Vite, featuring a custom blog and admin dashboard.",
             tags: ["React", "Tailwind", "Vite"],
             category: "Web Dev",
-            link: "#"
+            link: "https://harleygilpin.com"
         }
     ];
 
@@ -38,8 +38,8 @@ const Projects = () => {
                         key={category}
                         onClick={() => setFilter(category)}
                         className={`px-4 py-2 rounded-full border transition-all whitespace-nowrap ${filter === category
-                                ? 'bg-accent-primary text-bg-primary border-accent-primary font-bold'
-                                : 'bg-transparent border-white/10 text-text-secondary hover:border-accent-primary/50 hover:text-white'
+                            ? 'bg-accent-primary text-bg-primary border-accent-primary font-bold'
+                            : 'bg-transparent border-white/10 text-text-secondary hover:border-accent-primary/50 hover:text-white'
                             }`}
                     >
                         {category}

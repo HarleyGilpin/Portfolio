@@ -24,7 +24,7 @@ const Resume = () => {
                             <h3 className="text-xl font-bold">IT Auditor</h3>
                             <p className="text-accent-primary mb-2">Armanino • Present</p>
                             <p className="text-text-secondary">
-                                Conducting IT audits, risk assessments, and ensuring compliance with industry standards.
+                                As an IT Auditor in Armanino’s Risk Assurance & Advisory practice, I evaluate the security and compliance controls that support SOC 1 and SOC 2 reporting. I work directly with engineering, IT, product, and security teams to assess processes like access management, change management, incident response, vulnerability management, and governance. My role involves reviewing technical evidence, analyzing logs, validating privileged access, documenting exceptions, and clearly communicating expectations to clients throughout the audit. I focus on identifying risks early, ensuring controls operate effectively, and helping organizations build trust by maintaining secure and well-governed systems.
                             </p>
                         </div>
 
