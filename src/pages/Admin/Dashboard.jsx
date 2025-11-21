@@ -8,7 +8,7 @@ import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
-    const { posts, addPost, updatePost, deletePost, logout } = useBlog();
+    const { posts, addPost, updatePost, deletePost, logout, adminToken } = useBlog();
     const [isEditing, setIsEditing] = useState(false);
     const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '', image: '' });
 
@@ -19,7 +19,7 @@ const Dashboard = () => {
         try {
             const newBlob = await upload(file.name, file, {
                 access: 'public',
-                handleUploadUrl: `/api/upload?auth=${import.meta.env.VITE_ADMIN_PASSWORD}`,
+                handleUploadUrl: `/api/upload?auth=${adminToken}`,
             });
             return newBlob.url;
         } catch (error) {

@@ -8,8 +8,11 @@ export const BlogProvider = ({ children }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [adminToken, setAdminToken] = useState(() => {
+        return localStorage.getItem('adminToken');
+    });
     const [isAdmin, setIsAdmin] = useState(() => {
-        return localStorage.getItem('isAdmin') === 'true';
+        return !!localStorage.getItem('adminToken');
     });
 
     // Fetch posts from API
@@ -36,18 +39,31 @@ export const BlogProvider = ({ children }) => {
         return posts.find(post => post.slug === slug);
     };
 
-    const login = (password) => {
-        if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
-            setIsAdmin(true);
-            localStorage.setItem('isAdmin', 'true');
-            return true;
+    const login = async (password) => {
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password }),
+            });
+
+            if (response.ok) {
+                setIsAdmin(true);
+                setAdminToken(password);
+                localStorage.setItem('adminToken', password);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Login error:', error);
+            return false;
         }
-        return false;
     };
 
     const logout = () => {
         setIsAdmin(false);
-        localStorage.removeItem('isAdmin');
+        setAdminToken(null);
+        localStorage.removeItem('adminToken');
     };
 
     const addPost = async (post) => {
@@ -61,7 +77,7 @@ export const BlogProvider = ({ children }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-auth': import.meta.env.VITE_ADMIN_PASSWORD
+                    'x-admin-auth': adminToken
                 },
                 body: JSON.stringify(newPost),
             });
@@ -82,7 +98,7 @@ export const BlogProvider = ({ children }) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-auth': import.meta.env.VITE_ADMIN_PASSWORD
+                    'x-admin-auth': adminToken
                 },
                 body: JSON.stringify(updatedPost),
             });
@@ -103,7 +119,7 @@ export const BlogProvider = ({ children }) => {
             const response = await fetch(`/api/post?id=${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'x-admin-auth': import.meta.env.VITE_ADMIN_PASSWORD
+                    'x-admin-auth': adminToken
                 }
             });
 
@@ -120,6 +136,7 @@ export const BlogProvider = ({ children }) => {
         <BlogContext.Provider value={{
             posts,
             isAdmin,
+            adminToken,
             loading,
             error,
             login,
