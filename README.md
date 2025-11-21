@@ -52,23 +52,6 @@ https://github.com/user-attachments/assets/b37f95b5-f715-4737-a592-7130b0bb411c
 
 To access the Admin Dashboard and manage blog posts:
 
-1.  Navigate to `/admin/login` (e.g., `http://localhost:5173/admin/login`).
-2.  Enter the password configured in your `.env` file (default: **`admin123`**).
-
-> **Configuration**: Create a `.env` file in the root directory and add `VITE_ADMIN_PASSWORD=your_secure_password`.
-
-> **Note**: Data is persisted in your browser's `localStorage`. Clearing your cache will remove all blog posts.
-
-## 🏗️ Building for Production
-
-To create a production-ready build:
-
-```bash
-npm run build
-```
-
-The build artifacts will be stored in the `dist/` directory, ready to be deployed to Vercel, Netlify, or any static host.
-
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).

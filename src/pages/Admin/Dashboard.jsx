@@ -4,29 +4,58 @@ import 'react-quill-new/dist/quill.snow.css';
 import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
-
+import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout } = useBlog();
     const [isEditing, setIsEditing] = useState(false);
-    const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '' });
+    const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '', image: '' });
 
-    const handleSave = () => {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleImageUpload = async (file) => {
+        setIsUploading(true);
+        try {
+            const newBlob = await upload(file.name, file, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+            });
+            return newBlob.url;
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast.error('Failed to upload image');
+            return null;
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleSave = async () => {
         if (!currentPost.title || !currentPost.content) {
             toast.error('Please fill in all required fields');
             return;
         }
 
-        if (currentPost.id) {
-            updatePost(currentPost.id, currentPost);
-            toast.success('Post updated successfully');
-        } else {
-            addPost(currentPost);
-            toast.success('Post created successfully');
+        try {
+            const postToSave = {
+                ...currentPost,
+                image: currentPost.image || null // Ensure image is not undefined
+            };
+
+            if (currentPost.id) {
+                await updatePost(currentPost.id, postToSave);
+                toast.success('Post updated successfully');
+            } else {
+                await addPost(postToSave);
+                toast.success('Post created successfully');
+            }
+            setIsEditing(false);
+            setCurrentPost({ title: '', content: '', excerpt: '', image: '' });
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to save post');
         }
-        setIsEditing(false);
-        setCurrentPost({ title: '', content: '', excerpt: '' });
     };
 
     const handleEdit = (post) => {
@@ -49,6 +78,38 @@ const Dashboard = () => {
         });
     };
 
+    const modules = React.useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                ['link', 'image'],
+                ['clean']
+            ],
+            handlers: {
+                image: function () {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.click();
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        if (file) {
+                            const url = await handleImageUpload(file);
+                            if (url) {
+                                const quill = this.quill;
+                                const range = quill.getSelection();
+                                quill.insertEmbed(range.index, 'image', url);
+                            }
+                        }
+                    };
+                }
+            }
+        }
+    }), []);
+
     return (
         <div className="pt-4 pb-16 container mx-auto px-4">
             <SEO title="Admin Dashboard" description="Manage blog posts" />
@@ -58,7 +119,7 @@ const Dashboard = () => {
                 <div className="flex gap-4">
                     <button
                         onClick={() => {
-                            setCurrentPost({ title: '', content: '', excerpt: '' });
+                            setCurrentPost({ title: '', content: '', excerpt: '', image: '' });
                             setIsEditing(true);
                         }}
                         className="px-4 py-2 bg-accent-primary text-bg-primary rounded-lg font-bold flex items-center gap-2"
@@ -104,15 +165,7 @@ const Dashboard = () => {
                             value={currentPost.content}
                             onChange={(content) => setCurrentPost({ ...currentPost, content })}
                             className="h-[250px]"
-                            modules={{
-                                toolbar: [
-                                    [{ 'header': [1, 2, false] }],
-                                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                                    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                                    ['link', 'image'],
-                                    ['clean']
-                                ],
-                            }}
+                            modules={modules}
                         />
                     </div>
 
@@ -137,7 +190,7 @@ const Dashboard = () => {
                         <div key={post.id} className="glass-panel p-6 flex justify-between items-center">
                             <div>
                                 <h3 className="text-xl font-bold mb-1">{post.title}</h3>
-                                <p className="text-text-secondary text-sm">{new Date(post.createdAt).toLocaleDateString()}</p>
+                                <p className="text-text-secondary text-sm">{new Date(post.created_at).toLocaleDateString()}</p>
                             </div>
                             <div className="flex gap-2">
                                 <button

@@ -5,27 +5,41 @@ const BlogContext = createContext();
 export const useBlog = () => useContext(BlogContext);
 
 export const BlogProvider = ({ children }) => {
-    const [posts, setPosts] = useState(() => {
-        const savedPosts = localStorage.getItem('blogPosts');
-        return savedPosts ? JSON.parse(savedPosts) : [];
-    });
-
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isAdmin, setIsAdmin] = useState(() => {
         return localStorage.getItem('isAdmin') === 'true';
     });
 
-    useEffect(() => {
-        localStorage.setItem('blogPosts', JSON.stringify(posts));
-    }, [posts]);
+    // Fetch posts from API
+    const fetchPosts = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('/api/posts');
+            if (!response.ok) throw new Error('Failed to fetch posts');
+            const data = await response.json();
+            setPosts(data);
+        } catch (err) {
+            setError(err.message);
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        localStorage.setItem('isAdmin', isAdmin);
-    }, [isAdmin]);
+        fetchPosts();
+    }, []);
+
+    const getPostBySlug = (slug) => {
+        return posts.find(post => post.slug === slug);
+    };
 
     const login = (password) => {
-        // Simple password for demo purposes
         if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
             setIsAdmin(true);
+            localStorage.setItem('isAdmin', 'true');
             return true;
         }
         return false;
@@ -33,34 +47,72 @@ export const BlogProvider = ({ children }) => {
 
     const logout = () => {
         setIsAdmin(false);
+        localStorage.removeItem('isAdmin');
     };
 
-    const addPost = (post) => {
-        const newPost = {
-            ...post,
-            id: Date.now().toString(),
-            createdAt: new Date().toISOString(),
-            slug: post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
-        };
-        setPosts([newPost, ...posts]);
+    const addPost = async (post) => {
+        try {
+            const newPost = {
+                ...post,
+                slug: post.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+            };
+
+            const response = await fetch('/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPost),
+            });
+
+            if (!response.ok) throw new Error('Failed to create post');
+            const savedPost = await response.json();
+            setPosts([savedPost, ...posts]);
+            return savedPost;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
-    const updatePost = (id, updatedPost) => {
-        setPosts(posts.map(post => post.id === id ? { ...post, ...updatedPost } : post));
+    const updatePost = async (id, updatedPost) => {
+        try {
+            const response = await fetch(`/api/post?id=${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedPost),
+            });
+
+            if (!response.ok) throw new Error('Failed to update post');
+            const savedPost = await response.json();
+
+            setPosts(posts.map(post => post.id === id ? savedPost : post));
+            return savedPost;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
-    const deletePost = (id) => {
-        setPosts(posts.filter(post => post.id !== id));
-    };
+    const deletePost = async (id) => {
+        try {
+            const response = await fetch(`/api/post?id=${id}`, {
+                method: 'DELETE',
+            });
 
-    const getPostBySlug = (slug) => {
-        return posts.find(post => post.slug === slug);
+            if (!response.ok) throw new Error('Failed to delete post');
+
+            setPosts(posts.filter(post => post.id !== id));
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     return (
         <BlogContext.Provider value={{
             posts,
             isAdmin,
+            loading,
+            error,
             login,
             logout,
             addPost,
