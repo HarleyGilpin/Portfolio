@@ -23,6 +23,11 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
         try {
+            const authHeader = req.headers['x-admin-auth'];
+            if (authHeader !== process.env.VITE_ADMIN_PASSWORD) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
             const { title, content, excerpt, image } = req.body;
             if (!id) return res.status(400).json({ error: 'ID required' });
 
@@ -40,6 +45,11 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
         try {
+            const authHeader = req.headers['x-admin-auth'];
+            if (authHeader !== process.env.VITE_ADMIN_PASSWORD) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
             if (!id) return res.status(400).json({ error: 'ID required' });
             await sql`DELETE FROM posts WHERE id = ${id}`;
             return res.status(200).json({ message: 'Post deleted' });

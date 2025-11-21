@@ -19,7 +19,7 @@ const Dashboard = () => {
         try {
             const newBlob = await upload(file.name, file, {
                 access: 'public',
-                handleUploadUrl: '/api/upload',
+                handleUploadUrl: `/api/upload?auth=${import.meta.env.VITE_ADMIN_PASSWORD}`,
             });
             return newBlob.url;
         } catch (error) {

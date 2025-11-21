@@ -12,6 +12,11 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
         try {
+            const authHeader = req.headers['x-admin-auth'];
+            if (authHeader !== process.env.VITE_ADMIN_PASSWORD) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
             const { title, content, excerpt, image, slug } = req.body;
             if (!title || !slug) throw new Error('Title and Slug are required');
 

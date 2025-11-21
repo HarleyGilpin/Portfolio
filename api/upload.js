@@ -3,19 +3,21 @@ import { handleUpload } from '@vercel/blob/client';
 export default async function handler(req, res) {
     const body = req.body;
 
+    // Security Check
+    const authHeader = req.query.auth;
+    if (authHeader !== process.env.VITE_ADMIN_PASSWORD) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     try {
         const jsonResponse = await handleUpload({
             body,
             request: req,
             onBeforeGenerateToken: async (pathname) => {
-                // In a real app, you should check user authentication here
                 return {
                     allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
                     tokenPayload: JSON.stringify({}),
                 };
-            },
-            onUploadCompleted: async ({ blob, tokenPayload }) => {
-                console.log('blob uploaded', blob.url);
             },
         });
 

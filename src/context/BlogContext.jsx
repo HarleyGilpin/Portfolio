@@ -59,7 +59,10 @@ export const BlogProvider = ({ children }) => {
 
             const response = await fetch('/api/posts', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-auth': import.meta.env.VITE_ADMIN_PASSWORD
+                },
                 body: JSON.stringify(newPost),
             });
 
@@ -77,7 +80,10 @@ export const BlogProvider = ({ children }) => {
         try {
             const response = await fetch(`/api/post?id=${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-auth': import.meta.env.VITE_ADMIN_PASSWORD
+                },
                 body: JSON.stringify(updatedPost),
             });
 
@@ -96,6 +102,9 @@ export const BlogProvider = ({ children }) => {
         try {
             const response = await fetch(`/api/post?id=${id}`, {
                 method: 'DELETE',
+                headers: {
+                    'x-admin-auth': import.meta.env.VITE_ADMIN_PASSWORD
+                }
             });
 
             if (!response.ok) throw new Error('Failed to delete post');
