@@ -23,12 +23,13 @@ const Dashboard = () => {
         try {
             const newBlob = await upload(file.name, file, {
                 access: 'public',
-                handleUploadUrl: `/api/upload?auth=${adminToken}`,
+                handleUploadUrl: `/api/upload?auth=${encodeURIComponent(adminToken)}`,
             });
+            console.log('Client-side upload success:', newBlob);
             toast.success('Image uploaded successfully', { id: toastId });
             return newBlob.url;
         } catch (error) {
-            console.error('Upload error:', error);
+            console.error('Client-side upload error:', error);
             toast.error('Failed to upload image', { id: toastId });
             return null;
         } finally {
