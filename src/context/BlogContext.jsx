@@ -47,16 +47,19 @@ export const BlogProvider = ({ children }) => {
                 body: JSON.stringify({ password }),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
                 setIsAdmin(true);
                 setAdminToken(password);
                 localStorage.setItem('adminToken', password);
-                return true;
+                return { success: true };
             }
-            return false;
+
+            return { success: false, error: data.error || 'Login failed' };
         } catch (error) {
             console.error('Login error:', error);
-            return false;
+            return { success: false, error: 'Network error' };
         }
     };
 

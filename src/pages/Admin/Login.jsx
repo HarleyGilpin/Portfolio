@@ -12,11 +12,11 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = await login(password);
-        if (success) {
+        const result = await login(password);
+        if (result.success) {
             navigate('/admin');
         } else {
-            setError('Invalid password');
+            setError(result.error);
         }
     };
 
