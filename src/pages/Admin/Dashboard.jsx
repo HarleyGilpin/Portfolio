@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import BlotFormatter from 'quill-blot-formatter';
+import BlotFormatter from 'quill-blot-formatter/dist/BlotFormatter';
 import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
