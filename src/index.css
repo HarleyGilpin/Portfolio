@@ -64,6 +64,11 @@ body {
   min-height: 100vh;
 }
 
+::selection {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
 h1,
 h2,
 h3,
