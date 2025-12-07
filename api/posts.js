@@ -17,12 +17,16 @@ export default async function handler(req, res) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
-            const { title, content, excerpt, image, slug } = req.body;
+            // Ensure columns exist (Migration for dev)
+            await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS category VARCHAR(255)`;
+            await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS keywords TEXT`;
+
+            const { title, content, excerpt, image, slug, category, keywords } = req.body;
             if (!title || !slug) throw new Error('Title and Slug are required');
 
             const { rows } = await sql`
-        INSERT INTO posts (title, slug, excerpt, content, image)
-        VALUES (${title}, ${slug}, ${excerpt}, ${content}, ${image})
+        INSERT INTO posts (title, slug, excerpt, content, image, category, keywords)
+        VALUES (${title}, ${slug}, ${excerpt}, ${content}, ${image}, ${category}, ${keywords})
         RETURNING *;
       `;
             return res.status(201).json(rows[0]);

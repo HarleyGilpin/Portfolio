@@ -13,8 +13,7 @@ Quill.register('modules/blotFormatter', BlotFormatter);
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout, adminToken } = useBlog();
     const [isEditing, setIsEditing] = useState(false);
-    const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '', image: '' });
-
+    const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '', image: '', category: '', keywords: '' });
     const [isUploading, setIsUploading] = useState(false);
 
     const handleImageUpload = async (file) => {
@@ -34,6 +33,17 @@ const Dashboard = () => {
             return null;
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    const handleFeaturedImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Reuse the existing upload logic but set the specific state
+        const url = await handleImageUpload(file);
+        if (url) {
+            setCurrentPost(prev => ({ ...prev, image: url }));
         }
     };
 
@@ -57,7 +67,7 @@ const Dashboard = () => {
                 toast.success('Post created successfully');
             }
             setIsEditing(false);
-            setCurrentPost({ title: '', content: '', excerpt: '', image: '' });
+            setCurrentPost({ title: '', content: '', excerpt: '', image: '', category: '', keywords: '' });
         } catch (error) {
             console.error(error);
             toast.error('Failed to save post');
@@ -126,7 +136,7 @@ const Dashboard = () => {
                 <div className="flex gap-4">
                     <button
                         onClick={() => {
-                            setCurrentPost({ title: '', content: '', excerpt: '', image: '' });
+                            setCurrentPost({ title: '', content: '', excerpt: '', image: '', category: '', keywords: '' });
                             setIsEditing(true);
                         }}
                         className="px-4 py-2 bg-accent-primary text-bg-primary rounded-lg font-bold flex items-center gap-2"
@@ -154,6 +164,60 @@ const Dashboard = () => {
                             onChange={(e) => setCurrentPost({ ...currentPost, title: e.target.value })}
                             className="w-full bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none"
                         />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Featured Image */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Featured Image</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Image URL"
+                                    value={currentPost.image || ''}
+                                    onChange={(e) => setCurrentPost({ ...currentPost, image: e.target.value })}
+                                    className="flex-1 bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none"
+                                />
+                                <label className="cursor-pointer bg-white/10 hover:bg-white/20 text-white rounded-lg px-4 flex items-center justify-center transition-colors">
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleFeaturedImageUpload} />
+                                    Upload
+                                </label>
+                            </div>
+                            {currentPost.image && (
+                                <div className="mt-2 relative h-32 w-full rounded-lg overflow-hidden border border-white/10">
+                                    <img src={currentPost.image} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        onClick={() => setCurrentPost({ ...currentPost, image: '' })}
+                                        className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full hover:bg-red-500 transition-colors"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Category & Keywords */}
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Category (e.g. Engineering, Design)</label>
+                                <input
+                                    type="text"
+                                    value={currentPost.category || ''}
+                                    onChange={(e) => setCurrentPost({ ...currentPost, category: e.target.value })}
+                                    className="w-full bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Keywords (comma separated)</label>
+                                <input
+                                    type="text"
+                                    placeholder="react, tutorial, web dev"
+                                    value={currentPost.keywords || ''}
+                                    onChange={(e) => setCurrentPost({ ...currentPost, keywords: e.target.value })}
+                                    className="w-full bg-bg-primary border border-white/10 rounded-lg p-3 focus:border-accent-primary focus:outline-none"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div>

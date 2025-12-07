@@ -39,16 +39,32 @@ const BlogPost = () => {
             <SEO
                 title={post.title}
                 description={post.excerpt}
+                keywords={post.keywords}
                 type="article"
             />
 
             <article className="max-w-3xl mx-auto">
                 <header className="mb-8 text-center">
+                    {post.category && (
+                        <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wider text-accent-primary uppercase bg-accent-primary/10 rounded-full">
+                            {post.category}
+                        </span>
+                    )}
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
                     <p className="text-text-muted">
                         {new Date(post.created_at).toLocaleDateString()}
                     </p>
                 </header>
+
+                {post.image && (
+                    <div className="mb-10 rounded-2xl overflow-hidden shadow-2xl">
+                        <img
+                            src={post.image}
+                            alt={post.title}
+                            className="w-full h-auto object-cover max-h-[500px]"
+                        />
+                    </div>
+                )}
 
                 <div
                     className="prose prose-invert prose-lg max-w-none glass-panel p-8 md:p-12"

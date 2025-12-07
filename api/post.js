@@ -28,12 +28,12 @@ export default async function handler(req, res) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
-            const { title, content, excerpt, image } = req.body;
+            const { title, content, excerpt, image, category, keywords } = req.body;
             if (!id) return res.status(400).json({ error: 'ID required' });
 
             const { rows } = await sql`
         UPDATE posts 
-        SET title = ${title}, content = ${content}, excerpt = ${excerpt}, image = ${image}, updated_at = NOW()
+        SET title = ${title}, content = ${content}, excerpt = ${excerpt}, image = ${image}, category = ${category}, keywords = ${keywords}, updated_at = NOW()
         WHERE id = ${id}
         RETURNING *;
       `;
