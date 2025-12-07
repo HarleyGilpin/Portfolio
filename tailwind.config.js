@@ -4,6 +4,9 @@ export default {
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
+    plugins: [
+        require('@tailwindcss/typography'),
+    ],
     theme: {
         extend: {
             colors: {
@@ -24,7 +27,38 @@ export default {
                 'outfit': ['Outfit', 'sans-serif'],
                 'space-grotesk': ['Space Grotesk', 'sans-serif'],
             },
+            typography: (theme) => ({
+                DEFAULT: {
+                    css: {
+                        color: 'var(--text-secondary)',
+                        h1: { color: 'var(--text-primary)' },
+                        h2: { color: 'var(--text-primary)' },
+                        h3: { color: 'var(--text-primary)' },
+                        h4: { color: 'var(--text-primary)' },
+                        strong: { color: 'var(--text-primary)' },
+                        a: { color: 'var(--accent-primary)', '&:hover': { color: 'var(--accent-secondary)' } },
+                        code: { color: 'var(--accent-primary)' },
+                        'ul > li::marker': { color: 'var(--accent-primary)' },
+                        'ol > li::marker': { color: 'var(--accent-primary)' },
+                        blockquote: { borderLeftColor: 'var(--accent-primary)', color: 'var(--text-muted)' },
+                    },
+                },
+                invert: {
+                    css: {
+                        color: 'var(--text-secondary)',
+                        h1: { color: 'var(--text-primary)' },
+                        h2: { color: 'var(--text-primary)' },
+                        h3: { color: 'var(--text-primary)' },
+                        h4: { color: 'var(--text-primary)' },
+                        strong: { color: 'var(--text-primary)' },
+                        a: { color: 'var(--accent-primary)', '&:hover': { color: 'var(--accent-secondary)' } },
+                        code: { color: 'var(--accent-primary)' },
+                        'ul > li::marker': { color: 'var(--accent-primary)' },
+                        'ol > li::marker': { color: 'var(--accent-primary)' },
+                        blockquote: { borderLeftColor: 'var(--accent-primary)', color: 'var(--text-muted)' },
+                    }
+                }
+            }),
         },
     },
-    plugins: [],
 }

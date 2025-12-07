@@ -86,15 +86,39 @@ a {
   transition: var(--transition-fast);
 }
 
-ul {
-  list-style: none;
-}
+/* Global list reset removed to allow standard lists in content */
+/* Use 'list-none' utility class where needed instead */
 
 button {
   cursor: pointer;
   border: none;
   background: none;
   font-family: inherit;
+}
+
+/* Custom Prose Styles for Blog Content */
+.prose table {
+  width: 100%;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border-collapse: collapse;
+}
+
+.prose th {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 0.75em;
+  text-align: left;
+  border: 1px solid var(--border-color);
+  color: var(--accent-primary);
+}
+
+.prose td {
+  padding: 0.75em;
+  border: 1px solid var(--border-color);
+}
+
+.prose tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 /* Utilities */
