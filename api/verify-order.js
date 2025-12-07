@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         const agreementText = `
 SERVICE AGREEMENT
 
-This Agreement is made on ${currentDate} between Harley Gilpin ("Provider") and the Client associated with Order #${orderId}.
+This Agreement is made on ${currentDate} between Harley Gilpin ("Provider") and the Client associated with Order #${orderId} ("Client").
 
 1. SERVICES
 Provider agrees to deliver the services described in the "${session.line_items?.data?.[0]?.description || 'Selected Tier'}" package.
@@ -39,11 +39,27 @@ Provider agrees to deliver the services described in the "${session.line_items?.
 2. PAYMENT
 Client has paid a total of $${session.amount_total / 100} USD.
 
-3. TIMELINE
-Work will commence immediately. Provider agrees to maintain clear communication throughout the project lifecycle.
+3. RELATIONSHIP OF PARTIES
+Provider is an independent contractor. Nothing in this Agreement shall be construed to create a partnership, joint venture, or employer-employee relationship.
 
-4. TERMS
-This output serves as a binding digital confirmation of the paid services.
+4. INTELLECTUAL PROPERTY
+Upon full payment, Client shall own all rights, title, and interest in the final deliverables created specifically for Client. Provider retains ownership of any pre-existing materials, tools, or methodologies used.
+
+5. CONFIDENTIALITY
+Provider agrees to keep all Client proprietary information confidential and will not use it for any purpose other than providing the Services.
+
+6. WARRANTIES & LIMITATION OF LIABILITY
+Provider warrants that Services will be performed in a professional manner. EXCEPT AS EXPRESSLY STATED, PROVIDER MAKES NO WARRANTIES, EXPRESS OR IMPLIED.
+TO THE FULLEST EXTENT PERMITTED BY LAW, PROVIDER'S TOTAL LIABILITY UNDER THIS AGREEMENT SHALL NOT EXCEED THE TOTAL FEES PAID BY CLIENT. PROVIDER SHALL NOT BE LIABLE FOR ANY INDIRECT, CONSEQUENTIAL, OR INCIDENTAL DAMAGES.
+
+7. TERMINATION
+Either party may terminate this Agreement if the other party materially breaches its terms.
+
+8. GOVERNING LAW
+This Agreement shall be governed by the laws of the Provider's principal place of business.
+
+9. ENTIRE AGREEMENT
+This document serves as the binding confirmation of the services and terms agreed to by the parties.
     `.trim();
 
         // 3. Update Order in Database

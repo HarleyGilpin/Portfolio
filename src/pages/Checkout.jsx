@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaLock, FaCreditCard, FaArrowRight } from 'react-icons/fa';
 import { toast } from 'sonner';
+import Modal from '../components/Modal';
 
 const Checkout = () => {
     const [searchParams] = useSearchParams();
@@ -31,6 +32,8 @@ const Checkout = () => {
         projectDetails: '',
         deadline: ''
     });
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [activeModal, setActiveModal] = useState(null); // 'agreement' | 'terms' | null
 
     useEffect(() => {
         if (!selectedTier) {
@@ -144,9 +147,22 @@ const Checkout = () => {
                                 />
                             </div>
 
+                            <div className="flex items-start gap-3 mb-6">
+                                <input
+                                    type="checkbox"
+                                    id="terms"
+                                    checked={acceptedTerms}
+                                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                    className="mt-1 w-4 h-4 text-accent-primary bg-card-bg border-border-color rounded focus:ring-accent-primary focus:ring-offset-background"
+                                />
+                                <label htmlFor="terms" className="text-sm text-text-secondary leading-relaxed">
+                                    I agree to the <button type="button" onClick={() => setActiveModal('agreement')} className="text-accent-primary hover:underline font-semibold">Service Agreement</button> and <button type="button" onClick={() => setActiveModal('terms')} className="text-accent-primary hover:underline font-semibold">Terms of Service</button>. I understand that this purchase is for digital services and is non-refundable once work commences.
+                                </label>
+                            </div>
+
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading || !acceptedTerms}
                                 className="w-full bg-accent-primary text-background font-bold py-4 rounded-lg shadow-lg hover:bg-accent-secondary transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? 'Processing...' : (
@@ -199,7 +215,39 @@ const Checkout = () => {
                     </div>
                 </motion.div>
             </div>
-        </div>
+
+            {/* Service Agreement Modal */}
+            <Modal
+                isOpen={activeModal === 'agreement'}
+                onClose={() => setActiveModal(null)}
+                title="Service Agreement"
+            >
+                <div className="space-y-4 text-sm">
+                    <p><strong>1. Services</strong><br />Provider agrees to deliver the digital services described in the selected package. Services are performed as an independent contractor.</p>
+                    <p><strong>2. Payment</strong><br />Full payment is required upfront to commence work. All prices are in USD.</p>
+                    <p><strong>3. Intellectual Property</strong><br />Upon full payment, Client shall own all rights, title, and interest in the final deliverables created specifically for Client. Provider retains ownership of pre-existing materials and methodologies.</p>
+                    <p><strong>4. Confidentiality</strong><br />Provider agrees to keep all Client proprietary information confidential and will not use it for any purpose other than providing the Services.</p>
+                    <p><strong>5. Limitation of Liability</strong><br />To the fullest extent permitted by law, Provider's total liability shall not exceed the total fees paid by Client. Provider is not liable for indirect or consequential damages.</p>
+                    <p><strong>6. Termination</strong><br />Either party may terminate if the other materially breaches terms. Refunds are not provided for work already performed.</p>
+                    <p><strong>7. Governing Law</strong><br />This Agreement is governed by the laws of the Provider's principal place of business.</p>
+                </div>
+            </Modal>
+
+            {/* Terms of Service Modal */}
+            <Modal
+                isOpen={activeModal === 'terms'}
+                onClose={() => setActiveModal(null)}
+                title="Terms of Service"
+            >
+                <div className="space-y-4 text-sm">
+                    <p><strong>1. Acceptance of Terms</strong><br />By accessing this website and purchasing services, you agree to be bound by these Terms of Service.</p>
+                    <p><strong>2. Use of Service</strong><br />You agree to use our services only for lawful purposes and properly authorized business activities.</p>
+                    <p><strong>3. Digital Nature of Goods</strong><br />You acknowledge that our services are digital and intangible. Delivery is considered complete upon transmission of the final digital files or completion of the agreed task.</p>
+                    <p><strong>4. No Warranty</strong><br />Services are provided "as is" without warranty of any kind, express or implied.</p>
+                    <p><strong>5. Changes to Terms</strong><br />We reserve the right to modify these terms at any time. Continued use of the service constitutes acceptance of new terms.</p>
+                </div>
+            </Modal>
+        </div >
     );
 };
 
