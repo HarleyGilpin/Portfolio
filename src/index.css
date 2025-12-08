@@ -121,6 +121,51 @@ button {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
+/* Tighten Prose Spacing */
+.prose {
+  line-height: 1.5;
+  /* Reduce from default 1.75 */
+}
+
+.prose p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.prose li {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Handle empty paragraphs (breaks) */
+.prose p:empty {
+  height: 1em;
+  /* Ensure empty lines don't collapse completely but aren't huge */
+}
+
+.prose> :first-child {
+  margin-top: 0;
+}
+
+.prose> :last-child {
+  margin-bottom: 0;
+}
+
 /* Utilities */
 .container {
   max-width: 1200px;
@@ -167,4 +212,29 @@ button {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Custom Toolbar Icons */
+.ql-snow .ql-picker.ql-header {
+  color: white;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item::before {
+  color: white;
+}
+
+.ql-toolbar button {
+  color: white !important;
+}
+
+.ql-toolbar button:hover {
+  color: var(--accent-primary) !important;
+}
+
+.ql-hr::after {
+  content: "―";
+  font-weight: bold;
+  font-size: 14px;
+  display: inline-block;
 }

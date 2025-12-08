@@ -8,6 +8,13 @@ import SEO from '../../components/SEO';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
+// Custom Divider Blot
+const BlockEmbed = Quill.import('blots/block/embed');
+class DividerBlot extends BlockEmbed { }
+DividerBlot.blotName = 'divider';
+DividerBlot.tagName = 'hr';
+Quill.register(DividerBlot);
+
 Quill.register('modules/blotFormatter', BlotFormatter);
 
 const Dashboard = () => {
@@ -100,10 +107,15 @@ const Dashboard = () => {
                 [{ 'header': [1, 2, false] }],
                 ['bold', 'italic', 'underline', 'strike', 'blockquote'],
                 [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                ['link', 'image'],
+                ['link', 'image', 'video', 'hr'],
                 ['clean']
             ],
             handlers: {
+                hr: function () {
+                    const cursorPosition = this.quill.getSelection().index;
+                    this.quill.insertEmbed(cursorPosition, 'divider', true);
+                    this.quill.setSelection(cursorPosition + 1, Quill.sources.SILENT);
+                },
                 image: function () {
                     const input = document.createElement('input');
                     input.setAttribute('type', 'file');
