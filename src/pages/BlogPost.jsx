@@ -6,8 +6,16 @@ import DOMPurify from 'dompurify';
 
 const BlogPost = () => {
     const { slug } = useParams();
-    const { getPostBySlug } = useBlog();
+    const { getPostBySlug, loading } = useBlog();
     const post = getPostBySlug(slug);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-accent-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     if (!post) {
         return <Navigate to="/blog" replace />;
