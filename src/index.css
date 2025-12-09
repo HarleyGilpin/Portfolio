@@ -238,3 +238,25 @@ button {
   font-size: 14px;
   display: inline-block;
 }
+
+/* Handle Quill's data-list attribute */
+.prose ol li[data-list="bullet"] {
+  list-style-type: disc;
+}
+
+.prose ol li[data-list="ordered"] {
+  list-style-type: decimal;
+}
+
+/* Ensure editor preview matches */
+.ql-editor ul,
+.ql-editor li[data-list="bullet"] {
+  list-style-type: disc !important;
+  padding-left: 1.5em;
+}
+
+.ql-editor ol,
+.ql-editor li[data-list="ordered"] {
+  list-style-type: decimal !important;
+  padding-left: 1.5em;
+}
