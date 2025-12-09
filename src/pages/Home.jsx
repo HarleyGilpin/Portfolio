@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ProfilePic from '../assets/profile-pic.jpg';
+import ProfilePic from '../assets/profile-pic.webp';
 
 const Home = () => {
     return (
