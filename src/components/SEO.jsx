@@ -1,10 +1,14 @@
 import React from 'react';
 
 const SEO = ({ title, description, keywords, name, type }) => {
+    React.useEffect(() => {
+        document.title = `${title} | Harley Gilpin`;
+    }, [title]);
+
     return (
         <>
-            { /* Standard metadata tags */}
-            <title>{title} | Harley Gilpin</title>
+            { /* Meta tags - React 19 should hoist these, but if not, they sit in the component tree.
+                 For now, we'll keep them here.*/ }
             <meta name='description' content={description} />
             <meta name='keywords' content={keywords} />
 

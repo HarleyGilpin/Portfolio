@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaFileContract, FaHome, FaDownload } from 'react-icons/fa';
 import { toast } from 'sonner';
+import SEO from '../components/SEO';
 
 const Success = () => {
     const [searchParams] = useSearchParams();
@@ -20,7 +22,7 @@ const Success = () => {
             try {
                 // In a real app, you might poll this or wait for webhook
                 // For simplicity, we'll verify the session directly via our API
-                const response = await fetch(`/api/verify-order?session_id=${sessionId}`);
+                const response = await fetch(`/ api / verify - order ? session_id = ${sessionId} `);
                 const data = await response.json();
 
                 if (response.ok) {
@@ -59,6 +61,7 @@ const Success = () => {
 
     return (
         <div className="pt-24 pb-20 min-h-screen bg-background text-text-primary px-4">
+            <SEO title="Order Success" description="Thank you for your order." />
             <div className="container mx-auto max-w-3xl text-center">
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}

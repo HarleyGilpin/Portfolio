@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import SEO from '../components/SEO';
+
 const About = () => {
     return (
         <div className="pt-24 pb-16 container mx-auto px-4">
+            <SEO title="About Me" description="Learn more about Harley Gilpin, an IT Auditor and Software Engineer." />
             <h1 className="text-4xl md:text-5xl font-bold mb-12 text-center"><span className="text-gradient">About Me</span></h1>
 
             <div className="space-y-12 max-w-4xl mx-auto">

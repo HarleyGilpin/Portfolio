@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Mail, Linkedin, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
+import SEO from '../components/SEO';
 
 const Contact = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +32,7 @@ const Contact = () => {
 
     return (
         <div className="pt-4 pb-16 container mx-auto px-4">
+            <SEO title="Contact Me" description="Get in touch with Harley Gilpin for web development, IT audit, or marketing inquiries." />
             <h1 className="text-4xl font-bold mb-8 text-center"><span className="text-gradient">Get In Touch</span></h1>
 
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">

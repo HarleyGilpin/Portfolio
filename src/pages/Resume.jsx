@@ -1,9 +1,12 @@
 import React from 'react';
 import { Download, Briefcase, GraduationCap } from 'lucide-react';
 
+import SEO from '../components/SEO';
+
 const Resume = () => {
     return (
         <div className="pt-4 pb-16 container mx-auto px-4">
+            <SEO title="Resume" description="Harley Gilpin's professional resume. Experience in IT Audit, Software Engineering, and Digital Marketing." />
             <div className="flex justify-between items-center mb-12">
                 <h1 className="text-4xl font-bold"><span className="text-gradient">Resume</span></h1>
                 <a

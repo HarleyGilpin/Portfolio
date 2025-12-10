@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaLock, FaCreditCard, FaArrowRight } from 'react-icons/fa';
 import { toast } from 'sonner';
 import Modal from '../components/Modal';
+import SEO from '../components/SEO';
 
 const Checkout = () => {
     const [searchParams] = useSearchParams();
@@ -87,6 +88,7 @@ const Checkout = () => {
 
     return (
         <div className="pt-24 pb-20 min-h-screen bg-background text-text-primary px-4">
+            <SEO title="Checkout" description="Secure authentication checkout." />
             <div className="container mx-auto max-w-4xl">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
