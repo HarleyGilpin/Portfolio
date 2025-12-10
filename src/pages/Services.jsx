@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import { motion } from 'framer-motion';
 import {
     FaCode,
@@ -120,6 +121,11 @@ const Services = () => {
 
     return (
         <div className="pt-20 min-h-screen bg-background text-text-primary px-4 sm:px-8 lg:px-16 pb-20">
+            <SEO
+                title="Web Design & SEO Services"
+                description="Professional web design, graphic design, and SEO services. Transparent pricing for startups and growing businesses."
+                keywords="Web Design, SEO Services, Graphic Design, Branding, Digital Marketing, Copywriting"
+            />
             {/* Hero Section */}
             <section className="text-center mb-20">
                 <motion.h1

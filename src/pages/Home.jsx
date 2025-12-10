@@ -1,11 +1,17 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import ProfilePic from '../assets/profile-pic.webp';
 
 const Home = () => {
     return (
         <div className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-10">
+            <SEO
+                title="Future of Web Experiences"
+                description="Harley Gilpin is an IT Auditor and Software Engineer specializing in building secure, futuristic, and high-performance web applications."
+                keywords="IT Auditor, Software Engineer, Web Developer, React, Portfolio, Security, Frontend, Full Stack"
+            />
             {/* Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-primary/20 rounded-full blur-[100px] pointer-events-none" />
 

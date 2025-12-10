@@ -1,43 +1,26 @@
 import React from 'react';
-// import { Helmet } from 'react-helmet-async';
+import { Helmet } from 'react-helmet-async';
 
-const SEO = ({ title, description, type = 'website' }) => {
-    const siteTitle = 'Harley Gilpin | Portfolio';
-    const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
+const SEO = ({ title, description, keywords, name, type }) => {
+    return (
+        <Helmet>
+            { /* Standard metadata tags */}
+            <title>{title} | Harley Gilpin</title>
+            <meta name='description' content={description} />
+            <meta name='keywords' content={keywords} />
 
-    React.useEffect(() => {
-        document.title = fullTitle;
+            { /* Facebook tags */}
+            <meta property="og:type" content={type || 'website'} />
+            <meta property="og:title" content={title} />
+            <meta property="og:description" content={description} />
 
-        const updateMeta = (name, content) => {
-            let element = document.querySelector(`meta[name="${name}"]`);
-            if (!element) {
-                element = document.createElement('meta');
-                element.setAttribute('name', name);
-                document.head.appendChild(element);
-            }
-            element.setAttribute('content', content);
-        };
-
-        const updateOgMeta = (property, content) => {
-            let element = document.querySelector(`meta[property="${property}"]`);
-            if (!element) {
-                element = document.createElement('meta');
-                element.setAttribute('property', property);
-                document.head.appendChild(element);
-            }
-            element.setAttribute('content', content);
-        };
-
-        if (description) {
-            updateMeta('description', description);
-            updateOgMeta('og:description', description);
-        }
-        updateOgMeta('og:title', fullTitle);
-        updateOgMeta('og:type', type);
-
-    }, [fullTitle, description, type]);
-
-    return null;
+            { /* Twitter tags */}
+            <meta name="twitter:creator" content={name || 'Harley Gilpin'} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={title} />
+            <meta name="twitter:description" content={description} />
+        </Helmet>
+    );
 };
 
 export default SEO;

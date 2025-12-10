@@ -1,4 +1,5 @@
 import React from 'react';
+import SEO from '../components/SEO';
 import { ExternalLink, Github } from 'lucide-react';
 
 const Projects = () => {
@@ -29,6 +30,11 @@ const Projects = () => {
 
     return (
         <div className="pt-4 pb-16 container mx-auto px-4">
+            <SEO
+                title="My Projects"
+                description="Explore my portfolio of web development and game development projects, including 2011Scape and this portfolio website."
+                keywords="Portfolio, Projects, 2011Scape, Game Development, React Projects, Open Source"
+            />
             <h1 className="text-4xl font-bold mb-8"><span className="text-gradient">Featured Projects</span></h1>
 
             {/* Filter Buttons */}
