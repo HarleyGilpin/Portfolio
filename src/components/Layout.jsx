@@ -10,7 +10,7 @@ const Layout = () => {
                 <Outlet />
             </main>
             <footer className="py-8 text-center text-text-muted text-sm">
-                <p>&copy; {new Date().getFullYear()} Harley Gilpin. Built with React & Vite.</p>
+                <p>&copy; {new Date().getFullYear()} Harley Gilpin</p>
             </footer>
         </div>
     );

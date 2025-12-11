@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useBlog } from '../context/BlogContext';
 import SEO from '../components/SEO';
+import ShareButtons from '../components/ShareButtons';
 import DOMPurify from 'dompurify';
 
 const BlogPost = () => {
@@ -80,6 +81,11 @@ const BlogPost = () => {
                 <div
                     className="prose prose-invert prose-lg max-w-none glass-panel p-8 md:p-12"
                     dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+                />
+
+                <ShareButtons
+                    title={post.title}
+                    url={`https://harleygilpin.com/blog/${slug}`}
                 />
             </article>
         </div>
