@@ -28,6 +28,26 @@ async function setup() {
       );
     `;
     console.log('Table "login_attempts" created successfully.');
+
+    console.log('Creating orders table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        tier_name VARCHAR(255),
+        price DECIMAL,
+        client_name VARCHAR(255),
+        client_email VARCHAR(255),
+        project_details TEXT,
+        deadline VARCHAR(255),
+        status VARCHAR(50),
+        stripe_session_id VARCHAR(255),
+        agreement_content TEXT,
+        hosting_tier VARCHAR(100),
+        hosting_price DECIMAL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    console.log('Table "orders" created successfully.');
   } catch (error) {
     console.error('Error creating table:', error);
   }
