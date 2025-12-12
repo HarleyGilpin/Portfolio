@@ -50,6 +50,14 @@ export default async function handler(req, res) {
             await handleSubscriptionCanceled(event.data.object);
             break;
 
+        case 'customer.subscription.updated':
+            // Check if cancellation was just scheduled
+            const prev = event.data.previous_attributes;
+            if (prev && 'cancel_at_period_end' in prev && event.data.object.cancel_at_period_end === true) {
+                await handleSubscriptionUpdated(event.data.object);
+            }
+            break;
+
         case 'invoice.payment_failed':
             await handlePaymentFailed(event.data.object);
             break;
@@ -59,6 +67,26 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({ received: true });
+}
+
+/**
+ * Handle customer.subscription.updated event
+ * Notify when a user SCHEDULES a cancellation (e.g. at end of month)
+ */
+async function handleSubscriptionUpdated(subscription) {
+    console.log('Subscription cancellation scheduled:', subscription.id);
+
+    const orderId = subscription.metadata?.orderId;
+    const hostingTier = subscription.metadata?.hostingTier || 'Unknown Tier';
+
+    // Get cancellation date
+    const endDate = new Date(subscription.current_period_end * 1000).toLocaleDateString();
+
+    await createLinearIssue(
+        `Warning: Hosting Cancellation Scheduled - Order #${orderId || 'Unknown'}`,
+        `Client has requested cancellation effective on **${endDate}**.\n\nHosting Tier: ${hostingTier}\n\nTask: Prepare to offboard server on this date.`,
+        2 // High Priority
+    );
 }
 
 /**
