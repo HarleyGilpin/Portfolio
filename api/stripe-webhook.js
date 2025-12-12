@@ -51,10 +51,20 @@ export default async function handler(req, res) {
             break;
 
         case 'customer.subscription.updated':
-            // Check if cancellation was just scheduled
+            // Check if cancellation was just scheduled (Portal often sets cancel_at without checking cancel_at_period_end)
             const prev = event.data.previous_attributes;
-            if (prev && 'cancel_at_period_end' in prev && event.data.object.cancel_at_period_end === true) {
-                await handleSubscriptionUpdated(event.data.object);
+            const session = event.data.object;
+
+            if (prev) {
+                const isCancellation =
+                    // Case A: Explicit flag
+                    ('cancel_at_period_end' in prev && session.cancel_at_period_end === true) ||
+                    // Case B: Cancel date set (from null)
+                    ('cancel_at' in prev && session.cancel_at !== null);
+
+                if (isCancellation) {
+                    await handleSubscriptionUpdated(session);
+                }
             }
             break;
 
