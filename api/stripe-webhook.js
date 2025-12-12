@@ -12,12 +12,14 @@ export const config = {
     },
 };
 
-async function getRawBody(req) {
-    const chunks = [];
-    for await (const chunk of req) {
-        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-    }
-    return Buffer.concat(chunks);
+// Buffer to collect raw body data
+function buffer(readable) {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+        readable.on('data', (chunk) => chunks.push(chunk));
+        readable.on('end', () => resolve(Buffer.concat(chunks)));
+        readable.on('error', reject);
+    });
 }
 
 export default async function handler(req, res) {
@@ -25,14 +27,8 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const rawBody = await getRawBody(req);
+    const rawBody = await buffer(req);
     const sig = req.headers['stripe-signature'];
-
-    // Debug logging
-    console.log('Webhook received:');
-    console.log('  - Signature header:', sig ? 'present' : 'MISSING');
-    console.log('  - Webhook secret configured:', webhookSecret ? 'yes' : 'NO - check STRIPE_WEBHOOK_SECRET env var');
-    console.log('  - Raw body length:', rawBody.length);
 
     let event;
 
