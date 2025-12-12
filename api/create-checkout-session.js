@@ -53,9 +53,64 @@ export default async function handler(req, res) {
             console.log('Hosting columns may already exist:', e.message);
         }
 
+        // 2. Generate Full Service Agreement
+        const currentDate = new Date().toLocaleDateString();
+        let agreementContent = `
+SERVICE AGREEMENT
+
+This Agreement is made on ${currentDate} between Harley Gilpin ("Provider") and ${clientName} ("Client").
+
+1. SERVICES
+Provider agrees to deliver the digital services described in the "${tierName}" package. Services are performed as an independent contractor.
+
+2. PAYMENT
+Full payment of $${price} USD is required upfront to commence work.
+
+3. INTELLECTUAL PROPERTY
+Upon full payment, Client shall own all rights, title, and interest in the final deliverables created specifically for Client. Provider retains ownership of pre-existing materials and methodologies.
+
+4. CONFIDENTIALITY
+(a) Definition: "Confidential Information" includes business plans, technical data, trade secrets, customer lists, credentials, and proprietary methodologies.
+(b) Mutual Obligations: Both parties agree to protect each other's confidential information with the same care used for their own.
+(c) Exceptions: Does not apply to publicly available info, independently developed info, lawfully received info, or legally required disclosures.
+(d) Duration: Confidentiality obligations survive for 2 years after project completion.
+
+5. LIMITATION OF LIABILITY
+To the fullest extent permitted by law, Provider's total liability shall not exceed the total fees paid by Client. Provider is not liable for indirect or consequential damages.
+
+6. INDEMNIFICATION
+Client agrees to indemnify and hold Provider harmless against any claims, damages, or expenses arising from materials provided by Client (e.g., images, text) that infringe on third-party rights.
+
+7. PORTFOLIO USAGE
+Provider retains the right to reproduce, publish, and display the deliverables in Provider's portfolios and websites for the purpose of recognition of creative excellence or professional advancement.
+
+8. NON-EXCLUSIVITY
+This Agreement does not create an exclusive relationship. Provider is free to provide similar services to other clients, including competitors of Client.
+
+9. FORCE MAJEURE
+Provider is not liable for any failure or delay in performance due to causes beyond reasonable control, including acts of God, internet outages, or illness.
+
+10. TERMINATION
+Either party may terminate if the other materially breaches terms. Refunds are not provided for work already performed.
+
+11. GOVERNING LAW
+This Agreement is governed by the laws of the Provider's principal place of business.
+`.trim();
+
+        // Append Hosting Addendum if applicable
+        if (hostingTier) {
+            agreementContent += `
+
+12. HOSTING SERVICES ADDENDUM
+(a) Scope: Provider agrees to maintain the hosting environment, SSL certificates, and server availability as defined in the selected "${hostingName}" tier.
+(b) Availability: Provider aims for 99.9% service uptime. Scheduled maintenance will be communicated in advance.
+(c) Cancellation: Hosting is billed monthly. Client may cancel at any time via the customer portal. Access continues until the end of the current billing cycle. No refunds for partial months.
+`;
+        }
+
         const { rows } = await sql`
-          INSERT INTO orders (tier_name, price, client_name, client_email, project_details, deadline, status, hosting_tier, hosting_price)
-          VALUES (${tierName}, ${price}, ${clientName}, ${clientEmail}, ${projectDetails}, ${deadline}, 'pending', ${hostingTier || null}, ${hostingPrice || 0})
+          INSERT INTO orders (tier_name, price, client_name, client_email, project_details, deadline, status, hosting_tier, hosting_price, agreement_content)
+          VALUES (${tierName}, ${price}, ${clientName}, ${clientEmail}, ${projectDetails}, ${deadline}, 'pending', ${hostingTier || null}, ${hostingPrice || 0}, ${agreementContent})
           RETURNING id;
         `;
 
