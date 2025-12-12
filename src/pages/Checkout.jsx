@@ -1,9 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaLock, FaCreditCard, FaArrowRight } from 'react-icons/fa';
+import { FaLock, FaCreditCard, FaArrowRight, FaServer, FaRocket, FaCrown, FaCheckCircle } from 'react-icons/fa';
 import { toast } from 'sonner';
 import Modal from '../components/Modal';
+
+// Hosting tiers configuration
+const hostingTiers = [
+    {
+        id: 'managed',
+        name: 'Managed Hosting',
+        price: 25,
+        icon: FaServer,
+        color: 'from-blue-500 to-cyan-500',
+        description: 'Perfect for most small business sites',
+        features: [
+            'Fast CDN hosting',
+            'SSL certificate',
+            'Domain/DNS management',
+            'Uptime monitoring',
+            'Monthly backups',
+            'Basic support'
+        ],
+        bestFor: 'Brochure sites, landing pages, portfolios'
+    },
+    {
+        id: 'business',
+        name: 'Business Hosting',
+        price: 60,
+        icon: FaRocket,
+        color: 'from-purple-500 to-pink-500',
+        popular: true,
+        description: 'More reliability + features + support',
+        features: [
+            'Everything in Managed, plus:',
+            'Priority support responses',
+            'Performance optimization',
+            'Security hardening',
+            'Monthly reporting',
+            'Staging environment'
+        ],
+        bestFor: 'Small-to-mid businesses relying on uptime'
+    },
+    {
+        id: 'premium',
+        name: 'Premium Hosting + Care',
+        price: 120,
+        icon: FaCrown,
+        color: 'from-amber-500 to-orange-500',
+        description: 'Full-service hosting & ongoing support',
+        features: [
+            'Everything in Business, plus:',
+            'Unlimited small edits',
+            'Ongoing SEO monitoring',
+            'Analytics insights',
+            'Quarterly strategy call',
+            'Enhanced security scans'
+        ],
+        bestFor: 'Growing businesses, e-commerce, high-touch clients'
+    }
+];
 import SEO from '../components/SEO';
 
 const Checkout = () => {
@@ -34,6 +90,7 @@ const Checkout = () => {
         deadline: ''
     });
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [selectedHosting, setSelectedHosting] = useState(null); // null = no hosting, or hosting tier id
     const [activeModal, setActiveModal] = useState(null); // 'agreement' | 'terms' | null
 
     useEffect(() => {
@@ -53,6 +110,11 @@ const Checkout = () => {
         setLoading(true);
 
         try {
+            // Get selected hosting tier details if any
+            const hostingSelection = selectedHosting
+                ? hostingTiers.find(h => h.id === selectedHosting)
+                : null;
+
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -60,7 +122,11 @@ const Checkout = () => {
                     ...formData,
                     tierName: selectedTier.name,
                     price: selectedTier.price,
-                    tierId: tierId // Pass simple ID or full details
+                    tierId: tierId,
+                    // Hosting add-on data
+                    hostingTier: hostingSelection?.id || null,
+                    hostingName: hostingSelection?.name || null,
+                    hostingPrice: hostingSelection?.price || 0
                 })
             });
 
@@ -149,6 +215,76 @@ const Checkout = () => {
                                 />
                             </div>
 
+                            {/* Hosting Add-on Selector */}
+                            <div className="border border-border-color rounded-xl p-4 bg-card-bg/50">
+                                <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+                                    <FaServer className="text-accent-primary" />
+                                    Add Monthly Hosting
+                                </h3>
+                                <p className="text-text-muted text-sm mb-4">
+                                    Keep your site fast, secure, and maintained with ongoing hosting.
+                                </p>
+
+                                {/* No Hosting Option */}
+                                <div
+                                    onClick={() => setSelectedHosting(null)}
+                                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all mb-3 ${selectedHosting === null
+                                        ? 'border-accent-primary bg-accent-primary/10'
+                                        : 'border-border-color hover:border-accent-primary/50'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-medium">No Hosting</span>
+                                        <span className="text-text-muted text-sm">One-time project only</span>
+                                    </div>
+                                </div>
+
+                                {/* Hosting Tier Cards */}
+                                <div className="space-y-3">
+                                    {hostingTiers.map((tier) => {
+                                        const IconComponent = tier.icon;
+                                        const isSelected = selectedHosting === tier.id;
+                                        return (
+                                            <motion.div
+                                                key={tier.id}
+                                                onClick={() => setSelectedHosting(tier.id)}
+                                                whileHover={{ scale: 1.01 }}
+                                                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${isSelected
+                                                    ? 'border-accent-primary bg-accent-primary/10'
+                                                    : 'border-border-color hover:border-accent-primary/50'
+                                                    }`}
+                                            >
+                                                {tier.popular && (
+                                                    <span className="absolute -top-2 right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                                        POPULAR
+                                                    </span>
+                                                )}
+                                                <div className="flex items-start gap-3">
+                                                    <div className={`p-2 rounded-lg bg-gradient-to-br ${tier.color} text-white`}>
+                                                        <IconComponent className="text-lg" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="font-bold">{tier.name}</span>
+                                                            <span className="font-bold text-accent-primary">${tier.price}/mo</span>
+                                                        </div>
+                                                        <p className="text-text-muted text-xs mb-2">{tier.description}</p>
+                                                        <div className="grid grid-cols-2 gap-1">
+                                                            {tier.features.slice(0, 4).map((feature, i) => (
+                                                                <div key={i} className="flex items-center gap-1 text-xs text-text-secondary">
+                                                                    <FaCheckCircle className="text-accent-primary text-[10px] flex-shrink-0" />
+                                                                    <span className="truncate">{feature}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
                             <div className="flex items-start gap-3 mb-6">
                                 <input
                                     type="checkbox"
@@ -187,7 +323,8 @@ const Checkout = () => {
                                 <FaCreditCard className="text-accent-primary" /> Order Summary
                             </h3>
 
-                            <div className="border-b border-border-color pb-6 mb-6">
+                            {/* Service Package */}
+                            <div className="border-b border-border-color pb-4 mb-4">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="font-semibold text-lg">{selectedTier.name}</span>
                                     <span className="font-bold text-xl text-accent-primary">${selectedTier.price}</span>
@@ -195,22 +332,55 @@ const Checkout = () => {
                                 <p className="text-text-muted text-sm">One-time payment for digital services.</p>
                             </div>
 
-                            <div className="space-y-4">
+                            {/* Hosting Add-on (if selected) */}
+                            {selectedHosting && (() => {
+                                const hostingPlan = hostingTiers.find(h => h.id === selectedHosting);
+                                return hostingPlan ? (
+                                    <div className="border-b border-border-color pb-4 mb-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <span className="font-semibold">{hostingPlan.name}</span>
+                                                <span className="ml-2 text-xs bg-accent-primary/20 text-accent-primary px-2 py-0.5 rounded-full">Monthly</span>
+                                            </div>
+                                            <span className="font-bold text-accent-primary">${hostingPlan.price}/mo</span>
+                                        </div>
+                                        <p className="text-text-muted text-sm">Recurring monthly hosting subscription.</p>
+                                    </div>
+                                ) : null;
+                            })()}
+
+                            {/* Price Breakdown */}
+                            <div className="space-y-3">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-text-secondary">Subtotal</span>
+                                    <span className="text-text-secondary">Service (one-time)</span>
                                     <span>${selectedTier.price}.00</span>
                                 </div>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-text-secondary">Service Fee</span>
-                                    <span>$0.00</span>
-                                </div>
-                                <div className="border-t border-border-color pt-4 flex justify-between font-bold text-lg">
-                                    <span>Total Due</span>
-                                    <span className="text-accent-primary">${selectedTier.price}.00</span>
+                                {selectedHosting && (() => {
+                                    const hostingPlan = hostingTiers.find(h => h.id === selectedHosting);
+                                    return hostingPlan ? (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-text-secondary">Hosting (1st month)</span>
+                                            <span>${hostingPlan.price}.00</span>
+                                        </div>
+                                    ) : null;
+                                })()}
+                                <div className="border-t border-border-color pt-3">
+                                    <div className="flex justify-between font-bold text-lg">
+                                        <span>Today's Total</span>
+                                        <span className="text-accent-primary">
+                                            ${selectedTier.price + (selectedHosting ? hostingTiers.find(h => h.id === selectedHosting)?.price || 0 : 0)}.00
+                                        </span>
+                                    </div>
+                                    {selectedHosting && (
+                                        <div className="flex justify-between text-sm text-text-muted mt-2">
+                                            <span>Then monthly</span>
+                                            <span>${hostingTiers.find(h => h.id === selectedHosting)?.price}.00/mo</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="mt-8 p-4 bg-accent-primary/5 rounded-lg border border-accent-primary/20 text-sm text-text-secondary">
+                            <div className="mt-6 p-4 bg-accent-primary/5 rounded-lg border border-accent-primary/20 text-sm text-text-secondary">
                                 <p>By proceeding, you agree to the Terms of Service. An automated Service Agreement will be generated upon payment.</p>
                             </div>
                         </div>

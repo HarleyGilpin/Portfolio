@@ -22,7 +22,7 @@ const Success = () => {
             try {
                 // In a real app, you might poll this or wait for webhook
                 // For simplicity, we'll verify the session directly via our API
-                const response = await fetch(`/ api / verify - order ? session_id = ${sessionId} `);
+                const response = await fetch(`/api/verify-order?session_id=${sessionId}`);
                 const data = await response.json();
 
                 if (response.ok) {

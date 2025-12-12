@@ -19,8 +19,14 @@ export default async function handler(req, res) {
         // 1. Retrieve the session from Stripe to verify payment status
         const session = await stripe.checkout.sessions.retrieve(session_id);
 
-        if (session.payment_status !== 'paid') {
-            return res.status(400).json({ error: 'Payment not successful' });
+        // Check payment status - subscriptions show 'paid' after first invoice,
+        // but initially show 'unpaid' until invoice processes
+        // For subscriptions, also check if subscription was created successfully
+        const isPaid = session.payment_status === 'paid';
+        const isSubscriptionComplete = session.mode === 'subscription' && session.subscription;
+
+        if (!isPaid && !isSubscriptionComplete) {
+            return res.status(400).json({ error: 'Payment not successful', details: { payment_status: session.payment_status, mode: session.mode } });
         }
 
         const orderId = session.metadata.orderId;
