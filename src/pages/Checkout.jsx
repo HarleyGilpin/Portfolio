@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaLock, FaCreditCard, FaArrowRight, FaServer, FaRocket, FaCrown, FaCheckCircle } from 'react-icons/fa';
+import { FaLock, FaCreditCard, FaArrowRight, FaServer, FaRocket, FaCrown, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'sonner';
 import Modal from '../components/Modal';
 
@@ -379,6 +379,15 @@ const Checkout = () => {
                                     )}
                                 </div>
                             </div>
+
+                            {selectedHosting && (
+                                <div className="mt-4 p-3 bg-accent-primary/10 border border-accent-primary/20 rounded-lg flex gap-3 text-xs text-text-secondary">
+                                    <FaInfoCircle className="flex-shrink-0 mt-0.5 text-accent-primary" />
+                                    <p>
+                                        <strong>Note on Recurring Charge:</strong> Your first payment includes the one-time service fee plus the first month of hosting. The service fee will be automatically removed from your subscription after this payment. Future billing will be exactly ${hostingTiers.find(h => h.id === selectedHosting)?.price}.00/mo.
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="mt-6 p-4 bg-accent-primary/5 rounded-lg border border-accent-primary/20 text-sm text-text-secondary">
                                 <p>By proceeding, you agree to the Terms of Service. An automated Service Agreement will be generated upon payment.</p>
