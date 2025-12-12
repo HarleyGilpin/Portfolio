@@ -122,65 +122,12 @@ Reason: ${invoice.billing_reason || 'Unknown'}
 
 
 /**
- * Handle checkout.session.completed event
- * Update the order status in the database
- */
-async function handleCheckoutCompleted(session) {
-    console.log('Checkout completed:', session.id);
-
-    const orderId = session.metadata?.orderId;
-    if (!orderId) {
-        console.log('No orderId in session metadata');
-        return;
-    }
-
-    try {
-        // 1. Mark as Paid and Fetch Details
-        const result = await sql`
-            UPDATE orders 
-            SET status = 'paid'
-            WHERE id = ${parseInt(orderId)}
-            RETURNING *
-        `;
-
-        console.log(`Order ${orderId} marked as paid`);
-
-        // 2. Create Linear Task for Onboarding
-        if (result.rows.length > 0) {
-            const order = result.rows[0];
-            const description = `
-**Client:** ${order.client_name}
-**Email:** ${order.client_email}
-**Service Tier:** ${order.tier_name}
-**Hosting:** ${order.hosting_tier || 'None'}
-**Deadline:** ${order.deadline || 'No specific date'}
-
-**Project Details:**
-${order.project_details}
-
----
-*Created via Stripe Webhook*
-            `.trim();
-
-            await createLinearIssue(
-                `New Project: ${order.client_name} - ${order.tier_name}`,
-                description,
-                2 // High Priority
-            );
-        }
-
-    } catch (error) {
-        console.error('Error updating order status:', error);
-    }
-}
-
-const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
-const LINEAR_TEAM_ID = process.env.LINEAR_TEAM_ID;
-
-/**
  * Create a task in Linear
  */
 async function createLinearIssue(title, description, priority = 2) {
+    const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
+    const LINEAR_TEAM_ID = process.env.LINEAR_TEAM_ID;
+
     if (!LINEAR_API_KEY || !LINEAR_TEAM_ID) {
         console.warn('Linear API Key or Team ID missing. Skipping issue creation.');
         return;
@@ -229,52 +176,88 @@ async function createLinearIssue(title, description, priority = 2) {
 }
 
 /**
- * Handle customer.subscription.deleted event
- * Update order status when hosting is canceled
+ * Handle subscription cancellation
  */
 async function handleSubscriptionCanceled(subscription) {
     console.log('Subscription canceled:', subscription.id);
-
-    // Default metadata extraction
     const orderId = subscription.metadata?.orderId;
     const hostingTier = subscription.metadata?.hostingTier || 'Unknown Tier';
 
-    // Fallback: If orderId is missing, try to find customer email
+    // Fallback email logic
     const customerId = subscription.customer;
     let customerEmail = 'Unknown Email';
-
     try {
         if (customerId) {
             const customer = await stripe.customers.retrieve(customerId);
-            if (!customer.deleted) {
-                customerEmail = customer.email;
-            }
+            if (!customer.deleted) customerEmail = customer.email;
         }
-    } catch (e) {
-        console.error('Error fetching customer for log:', e);
-    }
-
-    if (!orderId) {
-        console.log(`No orderId in subscription ${subscription.id} metadata`);
-    }
+    } catch (e) { console.error(e); }
 
     try {
         if (orderId) {
+            await sql`UPDATE orders SET status = 'hosting_canceled' WHERE id = ${parseInt(orderId)}`;
+        }
+        await createLinearIssue(
+            `URGENT: Hosting Canceled - Order #${orderId || 'Unknown'}`,
+            `User (${customerEmail}) has canceled their hosting subscription.\n\nHosting Tier: ${hostingTier}\nSubscription ID: ${subscription.id}\n\nPlease proceed with server offboarding.`,
+            1
+        );
+    } catch (error) {
+        console.error('Error handling usage cancellation:', error);
+    }
+}
+
+async function handleCheckoutCompleted(session) {
+    console.log('Checkout completed:', session.id);
+    const orderId = session.metadata?.orderId;
+    if (!orderId) {
+        console.log('No orderId in session metadata');
+        return;
+    }
+
+    try {
+        // 1. Mark as Paid and Fetch Details
+        const result = await sql`
+            UPDATE orders 
+            SET status = 'paid'
+            WHERE id = ${parseInt(orderId)}
+            RETURNING *
+        `;
+
+        console.log(`Order ${orderId} marked as paid`);
+
+        // 2. Create Linear Task for Onboarding
+        if (result.rows.length > 0) {
+            const order = result.rows[0];
+            const description = `
+**Client:** ${order.client_name}
+**Email:** ${order.client_email}
+**Service Tier:** ${order.tier_name}
+**Hosting:** ${order.hosting_tier || 'None'}
+**Deadline:** ${order.deadline || 'No specific date'}
+
+**Project Details:**
+${order.project_details}
+
+---
+*Created via Stripe Webhook*
+            `.trim();
+
+            await createLinearIssue(
+                `New Project: ${order.client_name} - ${order.tier_name}`,
+                description,
+                2
+            );
+
+            // 3. CHECKPOINT: Mark as onboarding_started to prove we got here
             await sql`
                 UPDATE orders 
-                SET status = 'hosting_canceled'
+                SET status = 'onboarding_started'
                 WHERE id = ${parseInt(orderId)}
             `;
         }
 
-        // Trigger Linear Task
-        await createLinearIssue(
-            `URGENT: Hosting Canceled - Order #${orderId || 'Unknown'}`,
-            `User (${customerEmail}) has canceled their hosting subscription.\n\nHosting Tier: ${hostingTier}\nSubscription ID: ${subscription.id}\n\nPlease proceed with server offboarding.`,
-            1 // Urgent Priority
-        );
-
     } catch (error) {
-        console.error('Error handling usage cancellation:', error);
+        console.error('Error updating order status:', error);
     }
 }
