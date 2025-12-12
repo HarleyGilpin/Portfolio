@@ -66,8 +66,8 @@ export default async function handler(req, res) {
 
         // One-time service fee (always present)
         if (hostingTier) {
-            // For subscription mode: one-time items need price_data with recurring null workaround
-            // Stripe subscription mode requires all items to be recurring OR use invoice_creation
+            // For subscription mode: one-time items are passed without recurring data
+            // Stripe Checkout supports mixed one-time and recurring items in subscription mode
             lineItems.push({
                 price_data: {
                     currency: 'usd',
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
                         description: `Project execution for ${clientName}`,
                     },
                     unit_amount: price * 100,
-                    recurring: { interval: 'month', interval_count: 1 }
+                    // No recurring field means it's one-time
                 },
                 quantity: 1,
             });
@@ -123,12 +123,12 @@ export default async function handler(req, res) {
             },
         };
 
-        // For subscriptions, cancel after first payment for the service fee
+        // For subscriptions, payment behavior defaults to 'allow_incomplete'
         if (hostingTier) {
             sessionConfig.subscription_data = {
                 metadata: {
                     orderId: orderId.toString(),
-                    includesOneTimeService: 'true'
+                    hostingTier: hostingTier
                 }
             };
         }

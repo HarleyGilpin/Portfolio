@@ -7,13 +7,15 @@ import Modal from '../components/Modal';
 
 // Hosting tiers configuration
 const hostingTiers = [
+
     {
         id: 'managed',
         name: 'Managed Hosting',
-        price: 25,
+        price: 29,
         icon: FaServer,
         color: 'from-blue-500 to-cyan-500',
         description: 'Perfect for most small business sites',
+        domainInfo: 'Connect your existing domain (free setup included)',
         features: [
             'Fast CDN hosting',
             'SSL certificate',
@@ -32,6 +34,7 @@ const hostingTiers = [
         color: 'from-purple-500 to-pink-500',
         popular: true,
         description: 'More reliability + features + support',
+        domainInfo: 'Free .com domain included (1st year) + professional email setup',
         features: [
             'Everything in Managed, plus:',
             'Priority support responses',
@@ -49,6 +52,7 @@ const hostingTiers = [
         icon: FaCrown,
         color: 'from-amber-500 to-orange-500',
         description: 'Full-service hosting & ongoing support',
+        domainInfo: 'Free premium domain (.com/.io) + enterprise DNS management',
         features: [
             'Everything in Business, plus:',
             'Unlimited small edits',
@@ -263,12 +267,22 @@ const Checkout = () => {
                                                     <div className={`p-2 rounded-lg bg-gradient-to-br ${tier.color} text-white`}>
                                                         <IconComponent className="text-lg" />
                                                     </div>
+
                                                     <div className="flex-1">
                                                         <div className="flex items-center justify-between mb-1">
                                                             <span className="font-bold">{tier.name}</span>
                                                             <span className="font-bold text-accent-primary">${tier.price}/mo</span>
                                                         </div>
                                                         <p className="text-text-muted text-xs mb-2">{tier.description}</p>
+
+                                                        {/* Domain Info */}
+                                                        {tier.domainInfo && (
+                                                            <div className="mb-3 text-xs bg-background/50 p-2 rounded border border-border-color flex gap-2">
+                                                                <span className="text-lg">🌐</span>
+                                                                <span className="text-text-secondary">{tier.domainInfo}</span>
+                                                            </div>
+                                                        )}
+
                                                         <div className="grid grid-cols-2 gap-1">
                                                             {tier.features.slice(0, 4).map((feature, i) => (
                                                                 <div key={i} className="flex items-center gap-1 text-xs text-text-secondary">
@@ -395,10 +409,10 @@ const Checkout = () => {
                         </div>
                     </div>
                 </motion.div>
-            </div>
+            </div >
 
             {/* Service Agreement Modal */}
-            <Modal
+            < Modal
                 isOpen={activeModal === 'agreement'}
                 onClose={() => setActiveModal(null)}
                 title="Service Agreement"
@@ -413,13 +427,26 @@ const Checkout = () => {
                         <em>(c) Exceptions:</em> Does not apply to publicly available info, independently developed info, lawfully received info, or legally required disclosures.<br />
                         <em>(d) Duration:</em> Confidentiality obligations survive for 2 years after project completion.</p>
                     <p><strong>5. Limitation of Liability</strong><br />To the fullest extent permitted by law, Provider's total liability shall not exceed the total fees paid by Client. Provider is not liable for indirect or consequential damages.</p>
-                    <p><strong>6. Termination</strong><br />Either party may terminate if the other materially breaches terms. Refunds are not provided for work already performed.</p>
-                    <p><strong>7. Governing Law</strong><br />This Agreement is governed by the laws of the Provider's principal place of business.</p>
+                    <p><strong>6. Indemnification</strong><br />Client agrees to indemnify and hold Provider harmless against any claims, damages, or expenses arising from materials provided by Client (e.g., images, text) that infringe on third-party rights.</p>
+                    <p><strong>7. Portfolio Usage</strong><br />Provider retains the right to reproduce, publish, and display the deliverables in Provider's portfolios and websites for the purpose of recognition of creative excellence or professional advancement.</p>
+                    <p><strong>8. Non-Exclusivity</strong><br />This Agreement does not create an exclusive relationship. Provider is free to provide similar services to other clients, including competitors of Client.</p>
+                    <p><strong>9. Force Majeure</strong><br />Provider is not liable for any failure or delay in performance due to causes beyond reasonable control, including acts of God, internet outages, or illness.</p>
+                    <p><strong>10. Termination</strong><br />Either party may terminate if the other materially breaches terms. Refunds are not provided for work already performed.</p>
+                    <p><strong>11. Governing Law</strong><br />This Agreement is governed by the laws of the Provider's principal place of business.</p>
+
+                    {selectedHosting && (
+                        <div className="mt-4 pt-4 border-t border-border-color">
+                            <p><strong>12. Hosting Services Addendum</strong><br />
+                                <em>(a) Scope:</em> Provider agrees to maintain the hosting environment, SSL certificates, and server availability as defined in the selected "{hostingTiers.find(h => h.id === selectedHosting)?.name}" tier.<br />
+                                <em>(b) Availability:</em> Provider aims for 99.9% service uptime. Scheduled maintenance will be communicated in advance.<br />
+                                <em>(c) Cancellation:</em> Hosting is billed monthly. Client may cancel at any time via the customer portal. Access continues until the end of the current billing cycle. No refunds for partial months.</p>
+                        </div>
+                    )}
                 </div>
-            </Modal>
+            </Modal >
 
             {/* Terms of Service Modal */}
-            <Modal
+            < Modal
                 isOpen={activeModal === 'terms'}
                 onClose={() => setActiveModal(null)}
                 title="Terms of Service"
@@ -431,7 +458,7 @@ const Checkout = () => {
                     <p><strong>4. No Warranty</strong><br />Services are provided "as is" without warranty of any kind, express or implied.</p>
                     <p><strong>5. Changes to Terms</strong><br />We reserve the right to modify these terms at any time. Continued use of the service constitutes acceptance of new terms.</p>
                 </div>
-            </Modal>
+            </Modal >
         </div >
     );
 };

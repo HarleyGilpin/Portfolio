@@ -42,10 +42,6 @@ export default async function handler(req, res) {
 
     // Handle specific events
     switch (event.type) {
-        case 'invoice.paid':
-            await handleInvoicePaid(event.data.object);
-            break;
-
         case 'checkout.session.completed':
             await handleCheckoutCompleted(event.data.object);
             break;
@@ -61,76 +57,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ received: true });
 }
 
-/**
- * Handle invoice.paid event
- * After the first invoice is paid, remove the one-time service fee from the subscription
- */
-async function handleInvoicePaid(invoice) {
-    console.log('Invoice paid:', invoice.id);
 
-    // Only process if this is a subscription invoice
-    if (!invoice.subscription) return;
-
-    // Check if this is the first invoice (billing_reason = 'subscription_create')
-    if (invoice.billing_reason !== 'subscription_create') {
-        console.log('Not the first invoice, skipping service fee removal');
-        return;
-    }
-
-    try {
-        // Get the subscription
-        const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
-
-        // Check if this subscription was marked as having a one-time service
-        if (subscription.metadata?.includesOneTimeService !== 'true') {
-            console.log('Subscription does not include one-time service, skipping');
-            return;
-        }
-
-        // Find the service fee line item (the one that's NOT for hosting)
-        // Service items have "Project execution" in their description
-        const subscriptionItems = await stripe.subscriptionItems.list({
-            subscription: subscription.id,
-        });
-
-        for (const item of subscriptionItems.data) {
-            // Get the price/product details
-            const price = await stripe.prices.retrieve(item.price.id, {
-                expand: ['product']
-            });
-
-            // Check if this is the service fee (not hosting)
-            const productName = price.product.name || '';
-            const productDesc = price.product.description || '';
-
-            // Service items contain "Project execution" or tier names like "Pro Build", "Enterprise Solution"
-            // Hosting items contain "Hosting" in the name
-            if (!productName.toLowerCase().includes('hosting')) {
-                console.log(`Removing one-time service item: ${productName}`);
-
-                // Delete the subscription item (removes it from future invoices)
-                await stripe.subscriptionItems.del(item.id, {
-                    proration_behavior: 'none', // Don't prorate, it was a one-time charge
-                });
-
-                console.log(`Successfully removed service item from subscription ${subscription.id}`);
-            }
-        }
-
-        // Update the subscription metadata to mark service as removed
-        await stripe.subscriptions.update(subscription.id, {
-            metadata: {
-                ...subscription.metadata,
-                includesOneTimeService: 'removed',
-                serviceRemovedAt: new Date().toISOString()
-            }
-        });
-
-    } catch (error) {
-        console.error('Error removing service fee:', error);
-        throw error;
-    }
-}
 
 /**
  * Handle checkout.session.completed event
