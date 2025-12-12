@@ -66,14 +66,19 @@ const hostingTiers = [
 ];
 import SEO from '../components/SEO';
 
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { addDays, subDays } from 'date-fns';
+
 const Checkout = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [blockedDates, setBlockedDates] = useState([]);
 
     const tierId = searchParams.get('tier');
 
-    // Tier Data (Ideally this would be shared or fetched)
+    // Tier Data
     const tiers = {
         '0': { name: 'Starter Task', price: 10 },
         '1': { name: 'Basic Boost', price: 25 },
@@ -85,28 +90,43 @@ const Checkout = () => {
         '7': { name: 'Enterprise Solution', price: 1000 },
     };
 
-    const selectedTier = tiers[tierId];
+    const selectedTier = tiers[tierId] || tiers['0']; // Fallback to avoid crash
 
     const [formData, setFormData] = useState({
         clientName: '',
         clientEmail: '',
         projectDetails: '',
-        deadline: ''
+        deadline: null // changed from '' to null for DatePicker
     });
     const [acceptedTerms, setAcceptedTerms] = useState(false);
-    const [selectedHosting, setSelectedHosting] = useState(null); // null = no hosting, or hosting tier id
-    const [activeModal, setActiveModal] = useState(null); // 'agreement' | 'terms' | null
+    const [selectedHosting, setSelectedHosting] = useState(null);
+    const [activeModal, setActiveModal] = useState(null);
 
     useEffect(() => {
-        if (!selectedTier) {
-            toast.error("No service tier selected.");
-            navigate('/services');
-        }
-    }, [selectedTier, navigate]);
+        // Fetch blocked dates
+        const fetchBlockedDates = async () => {
+            try {
+                const res = await fetch('/api/get-blocked-dates');
+                const data = await res.json();
+                if (data.blockedDates) {
+                    // Convert strings to Date objects
+                    setBlockedDates(data.blockedDates.map(d => new Date(d)));
+                }
+            } catch (error) {
+                console.error("Failed to load blocked dates:", error);
+            }
+        };
+        fetchBlockedDates();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Custom handler for DatePicker
+    const handleDateChange = (date) => {
+        setFormData(prev => ({ ...prev, deadline: date }));
     };
 
     const handleSubmit = async (e) => {
@@ -114,7 +134,6 @@ const Checkout = () => {
         setLoading(true);
 
         try {
-            // Get selected hosting tier details if any
             const hostingSelection = selectedHosting
                 ? hostingTiers.find(h => h.id === selectedHosting)
                 : null;
@@ -124,10 +143,11 @@ const Checkout = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    // Format date as string if it exists
+                    deadline: formData.deadline ? formData.deadline.toISOString().split('T')[0] : '',
                     tierName: selectedTier.name,
                     price: selectedTier.price,
                     tierId: tierId,
-                    // Hosting add-on data
                     hostingTier: hostingSelection?.id || null,
                     hostingName: hostingSelection?.name || null,
                     hostingPrice: hostingSelection?.price || 0
@@ -210,13 +230,18 @@ const Checkout = () => {
 
                             <div>
                                 <label className="block text-sm font-medium mb-2 text-text-secondary">Preferred Deadline (Optional)</label>
-                                <input
-                                    type="date"
-                                    name="deadline"
-                                    value={formData.deadline}
-                                    onChange={handleChange}
-                                    className="w-full bg-card-bg border border-border-color rounded-lg p-3 focus:outline-none focus:border-accent-primary transition-colors"
+                                <DatePicker
+                                    selected={formData.deadline}
+                                    onChange={handleDateChange}
+                                    minDate={addDays(new Date(), 1)} // Disable past and today
+                                    excludeDates={blockedDates}    // Disable fetched dates
+                                    placeholderText="Select a future date..."
+                                    className="w-full bg-card-bg border border-border-color rounded-lg p-3 focus:outline-none focus:border-accent-primary transition-colors cursor-pointer"
+                                    dateFormat="yyyy-MM-dd"
                                 />
+                                <p className="text-xs text-text-muted mt-1">
+                                    grayed-out dates are unavailable
+                                </p>
                             </div>
 
                             {/* Hosting Add-on Selector */}
