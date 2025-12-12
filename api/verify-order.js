@@ -46,7 +46,10 @@ Provider is an independent contractor. Nothing in this Agreement shall be constr
 Upon full payment, Client shall own all rights, title, and interest in the final deliverables created specifically for Client. Provider retains ownership of any pre-existing materials, tools, or methodologies used.
 
 5. CONFIDENTIALITY
-Provider agrees to keep all Client proprietary information confidential and will not use it for any purpose other than providing the Services.
+(a) Definition: "Confidential Information" includes all non-public information disclosed by either party, including but not limited to: business plans, technical data, product ideas, trade secrets, customer lists, pricing information, login credentials, and proprietary methodologies.
+(b) Mutual Obligations: Both Provider and Client agree to hold each other's Confidential Information in strict confidence, using at least the same degree of care used to protect their own confidential information.
+(c) Exceptions: This obligation does not apply to information that: (i) was already publicly available, (ii) was independently developed without use of the other party's information, (iii) was lawfully received from a third party, or (iv) is required to be disclosed by law or court order.
+(d) Duration: These confidentiality obligations shall survive for two (2) years following the completion or termination of this Agreement.
 
 6. WARRANTIES & LIMITATION OF LIABILITY
 Provider warrants that Services will be performed in a professional manner. EXCEPT AS EXPRESSLY STATED, PROVIDER MAKES NO WARRANTIES, EXPRESS OR IMPLIED.

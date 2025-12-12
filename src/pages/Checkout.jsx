@@ -228,7 +228,11 @@ const Checkout = () => {
                     <p><strong>1. Services</strong><br />Provider agrees to deliver the digital services described in the selected package. Services are performed as an independent contractor.</p>
                     <p><strong>2. Payment</strong><br />Full payment is required upfront to commence work. All prices are in USD.</p>
                     <p><strong>3. Intellectual Property</strong><br />Upon full payment, Client shall own all rights, title, and interest in the final deliverables created specifically for Client. Provider retains ownership of pre-existing materials and methodologies.</p>
-                    <p><strong>4. Confidentiality</strong><br />Provider agrees to keep all Client proprietary information confidential and will not use it for any purpose other than providing the Services.</p>
+                    <p><strong>4. Confidentiality</strong><br />
+                        <em>(a) Definition:</em> "Confidential Information" includes business plans, technical data, trade secrets, customer lists, credentials, and proprietary methodologies.<br />
+                        <em>(b) Mutual Obligations:</em> Both parties agree to protect each other's confidential information with the same care used for their own.<br />
+                        <em>(c) Exceptions:</em> Does not apply to publicly available info, independently developed info, lawfully received info, or legally required disclosures.<br />
+                        <em>(d) Duration:</em> Confidentiality obligations survive for 2 years after project completion.</p>
                     <p><strong>5. Limitation of Liability</strong><br />To the fullest extent permitted by law, Provider's total liability shall not exceed the total fees paid by Client. Provider is not liable for indirect or consequential damages.</p>
                     <p><strong>6. Termination</strong><br />Either party may terminate if the other materially breaches terms. Refunds are not provided for work already performed.</p>
                     <p><strong>7. Governing Law</strong><br />This Agreement is governed by the laws of the Provider's principal place of business.</p>
