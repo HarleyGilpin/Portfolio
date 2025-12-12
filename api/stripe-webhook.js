@@ -50,11 +50,45 @@ export default async function handler(req, res) {
             await handleSubscriptionCanceled(event.data.object);
             break;
 
+        case 'invoice.payment_failed':
+            await handlePaymentFailed(event.data.object);
+            break;
+
         default:
             console.log(`Unhandled event type: ${event.type}`);
     }
 
     return res.status(200).json({ received: true });
+}
+
+/**
+ * Handle invoice.payment_failed event
+ * Alert Linear when a recurring payment fails
+ */
+async function handlePaymentFailed(invoice) {
+    console.log('Payment failed:', invoice.id);
+
+    const email = invoice.customer_email || 'Unknown Email';
+    const amount = invoice.amount_due / 100; // Convert cents to dollars
+    const payUrl = invoice.hosted_invoice_url;
+
+    // Create URGENT task
+    await createLinearIssue(
+        `URGENT: Payment Failed - ${email} ($${amount})`,
+        `**Revenue Alert**
+        
+Client: ${email}
+Amount Overdue: $${amount}
+Reason: ${invoice.billing_reason || 'Unknown'}
+
+**Action Required:**
+1. Check Stripe Dashboard.
+2. Contact client to update payment method.
+3. Consider pausing hosting if unresolved.
+
+[View Invoice in Stripe](${payUrl})`,
+        1 // Urgent Priority
+    );
 }
 
 
@@ -84,6 +118,60 @@ async function handleCheckoutCompleted(session) {
     }
 }
 
+const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
+const LINEAR_TEAM_ID = process.env.LINEAR_TEAM_ID;
+
+/**
+ * Create a task in Linear
+ */
+async function createLinearIssue(title, description, priority = 2) {
+    if (!LINEAR_API_KEY || !LINEAR_TEAM_ID) {
+        console.warn('Linear API Key or Team ID missing. Skipping issue creation.');
+        return;
+    }
+
+    try {
+        const response = await fetch('https://api.linear.app/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': LINEAR_API_KEY,
+            },
+            body: JSON.stringify({
+                query: `
+            mutation IssueCreate($input: IssueCreateInput!) {
+              issueCreate(input: $input) {
+                success
+                issue {
+                  id
+                  title
+                  url
+                }
+              }
+            }
+          `,
+                variables: {
+                    input: {
+                        teamId: LINEAR_TEAM_ID,
+                        title: title,
+                        description: description,
+                        priority: priority // 1=Urgent, 2=High, 3=Normal, 4=Low
+                    }
+                }
+            }),
+        });
+
+        const data = await response.json();
+        if (data.errors) {
+            console.error('Linear API errors:', data.errors);
+        } else {
+            console.log('Linear issue created:', data.data.issueCreate.issue.url);
+        }
+    } catch (error) {
+        console.error('Error creating Linear issue:', error);
+    }
+}
+
 /**
  * Handle customer.subscription.deleted event
  * Update order status when hosting is canceled
@@ -91,16 +179,46 @@ async function handleCheckoutCompleted(session) {
 async function handleSubscriptionCanceled(subscription) {
     console.log('Subscription canceled:', subscription.id);
 
+    // Default metadata extraction
     const orderId = subscription.metadata?.orderId;
-    if (!orderId) return;
+    const hostingTier = subscription.metadata?.hostingTier || 'Unknown Tier';
+
+    // Fallback: If orderId is missing, try to find customer email
+    const customerId = subscription.customer;
+    let customerEmail = 'Unknown Email';
 
     try {
-        await sql`
-            UPDATE orders 
-            SET status = 'hosting_canceled'
-            WHERE id = ${parseInt(orderId)}
-        `;
+        if (customerId) {
+            const customer = await stripe.customers.retrieve(customerId);
+            if (!customer.deleted) {
+                customerEmail = customer.email;
+            }
+        }
+    } catch (e) {
+        console.error('Error fetching customer for log:', e);
+    }
+
+    if (!orderId) {
+        console.log(`No orderId in subscription ${subscription.id} metadata`);
+    }
+
+    try {
+        if (orderId) {
+            await sql`
+                UPDATE orders 
+                SET status = 'hosting_canceled'
+                WHERE id = ${parseInt(orderId)}
+            `;
+        }
+
+        // Trigger Linear Task
+        await createLinearIssue(
+            `URGENT: Hosting Canceled - Order #${orderId || 'Unknown'}`,
+            `User (${customerEmail}) has canceled their hosting subscription.\n\nHosting Tier: ${hostingTier}\nSubscription ID: ${subscription.id}\n\nPlease proceed with server offboarding.`,
+            1 // Urgent Priority
+        );
+
     } catch (error) {
-        console.error('Error updating order status:', error);
+        console.error('Error handling usage cancellation:', error);
     }
 }

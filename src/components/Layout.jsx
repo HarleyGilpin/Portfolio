@@ -11,6 +11,9 @@ const Layout = () => {
             </main>
             <footer className="py-8 text-center text-text-muted text-sm">
                 <p>&copy; {new Date().getFullYear()} Harley Gilpin</p>
+                <div className="mt-2">
+                    <a href="/portal" className="text-xs text-text-secondary hover:text-accent-primary transition-colors">Client Portal</a>
+                </div>
             </footer>
         </div>
     );

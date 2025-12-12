@@ -8,6 +8,7 @@ import About from './pages/About';
 import Services from './pages/Services';
 import Checkout from './pages/Checkout';
 import Success from './pages/Success';
+import Portal from './pages/Portal';
 import Projects from './pages/Projects';
 import Resume from './pages/Resume';
 import Contact from './pages/Contact';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/admin/login" element={<Login />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/portal" element={<Portal />} />
           <Route path="/admin" element={
             <ProtectedRoute>
               <Dashboard />
