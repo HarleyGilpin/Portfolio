@@ -107,12 +107,40 @@ async function handleCheckoutCompleted(session) {
     }
 
     try {
-        await sql`
+        // 1. Mark as Paid and Fetch Details
+        const result = await sql`
             UPDATE orders 
             SET status = 'paid'
             WHERE id = ${parseInt(orderId)}
+            RETURNING *
         `;
+
         console.log(`Order ${orderId} marked as paid`);
+
+        // 2. Create Linear Task for Onboarding
+        if (result.rows.length > 0) {
+            const order = result.rows[0];
+            const description = `
+**Client:** ${order.client_name}
+**Email:** ${order.client_email}
+**Service Tier:** ${order.tier_name}
+**Hosting:** ${order.hosting_tier || 'None'}
+**Deadline:** ${order.deadline || 'No specific date'}
+
+**Project Details:**
+${order.project_details}
+
+---
+*Created via Stripe Webhook*
+            `.trim();
+
+            await createLinearIssue(
+                `New Project: ${order.client_name} - ${order.tier_name}`,
+                description,
+                2 // High Priority
+            );
+        }
+
     } catch (error) {
         console.error('Error updating order status:', error);
     }
