@@ -14,6 +14,7 @@ import Resume from './pages/Resume';
 import Contact from './pages/Contact';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import FAQ from './pages/FAQ';
 import Login from './pages/Admin/Login';
 import Dashboard from './pages/Admin/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -36,6 +37,7 @@ function App() {
             <Route path="contact" element={<Contact />} />
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:slug" element={<BlogPost />} />
+            <Route path="faq" element={<FAQ />} />
           </Route>
           <Route path="/admin/login" element={<Login />} />
           <Route path="/checkout" element={<Checkout />} />

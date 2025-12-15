@@ -13,6 +13,8 @@ const Layout = () => {
                 <p>&copy; {new Date().getFullYear()} Harley Gilpin</p>
                 <div className="mt-2">
                     <a href="/portal" className="text-xs text-text-secondary hover:text-accent-primary transition-colors">Client Portal</a>
+                    <span className="mx-2 text-text-muted">•</span>
+                    <a href="/faq" className="text-xs text-text-secondary hover:text-accent-primary transition-colors">FAQ</a>
                 </div>
             </footer>
         </div>
