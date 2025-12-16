@@ -40,10 +40,10 @@ const FAQItem = ({ question, answer, isOpen, onClick }) => {
                 onClick={onClick}
                 className="flex items-center justify-between w-full p-6 text-left"
             >
-                <span className={`text-lg font-medium transition-colors ${isOpen ? 'text-primary' : 'text-white'}`}>
+                <span className={`text-lg font-medium transition-colors ${isOpen ? 'text-primary' : 'text-text-primary'}`}>
                     {question}
                 </span>
-                <span className={`p-2 rounded-full transition-colors ${isOpen ? 'bg-primary/20 text-primary' : 'bg-white/10 text-white/60'}`}>
+                <span className={`p-2 rounded-full transition-colors ${isOpen ? 'bg-primary/20 text-primary' : 'bg-white/10 text-text-muted'}`}>
                     {isOpen ? <Minus size={20} /> : <Plus size={20} />}
                 </span>
             </button>
@@ -55,7 +55,7 @@ const FAQItem = ({ question, answer, isOpen, onClick }) => {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                        <div className="px-6 pb-6 text-white/70 leading-relaxed border-t border-white/5 pt-4">
+                        <div className="px-6 pb-6 text-text-muted leading-relaxed border-t border-white/5 pt-4">
                             {answer}
                         </div>
                     </motion.div>
@@ -88,7 +88,7 @@ const FAQ = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-5xl font-bold text-white tracking-tight"
+                        className="text-4xl md:text-5xl font-bold text-text-primary tracking-tight"
                     >
                         Frequently Asked <span className="text-gradient">Questions</span>
                     </motion.h1>
@@ -97,7 +97,7 @@ const FAQ = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-lg text-white/60 max-w-2xl mx-auto"
+                        className="text-lg text-text-muted max-w-2xl mx-auto"
                     >
                         Here are detailed answers to the most common questions about my services, process, and terms.
                     </motion.p>
@@ -127,8 +127,8 @@ const FAQ = () => {
                     transition={{ delay: 1 }}
                     className="mt-16 text-center bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm"
                 >
-                    <h3 className="text-xl font-semibold text-white mb-2">Still have questions?</h3>
-                    <p className="text-white/60 mb-6">Can't find the answer you're looking for? Please chat to our friendly team.</p>
+                    <h3 className="text-xl font-semibold text-text-primary mb-2">Still have questions?</h3>
+                    <p className="text-text-muted mb-6">Can't find the answer you're looking for? Please chat to our friendly team.</p>
                     <a
                         href="/contact"
                         className="inline-flex items-center justify-center px-8 py-3 rounded-lg font-bold border border-accent-primary text-accent-primary hover:bg-accent-primary hover:text-black transition-all gap-2"

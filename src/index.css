@@ -47,6 +47,27 @@
   --transition-slow: 0.5s ease;
 }
 
+:root.light {
+  /* Core Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-tertiary: #e4e4e7;
+
+  /* Text Colors */
+  --text-primary: #09090b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+
+  /* Accent Colors - High Contrast for Light Mode */
+  --accent-primary: #0891b2;
+  /* Deep Cyan */
+  --accent-secondary: #6d28d9;
+  /* Deep Purple */
+
+  --border-color: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+}
+
 * {
   margin: 0;
   padding: 0;

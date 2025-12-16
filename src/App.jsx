@@ -22,36 +22,40 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'sonner';
 import NotFound from './pages/NotFound';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <BlogProvider>
-      <Router>
-        <Toaster position="top-center" theme="dark" richColors />
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="services" element={<Services />} />
-            <Route path="projects" element={<Projects />} />
-            <Route path="resume" element={<Resume />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="blog" element={<Blog />} />
-            <Route path="blog/:slug" element={<BlogPost />} />
-            <Route path="faq" element={<FAQ />} />
-          </Route>
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/portal" element={<Portal />} />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </BlogProvider>
+    <ThemeProvider>
+      <BlogProvider>
+        <Router>
+          <Toaster position="top-center" theme="dark" richColors />
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="about" element={<About />} />
+              <Route path="services" element={<Services />} />
+              <Route path="projects" element={<Projects />} />
+              <Route path="resume" element={<Resume />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="blog" element={<Blog />} />
+              <Route path="blog/:slug" element={<BlogPost />} />
+              <Route path="faq" element={<FAQ />} />
+            </Route>
+            <Route path="/admin/login" element={<Login />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/portal" element={<Portal />} />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </BlogProvider>
+    </ThemeProvider>
   );
 }
 

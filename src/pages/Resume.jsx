@@ -13,7 +13,7 @@ const Resume = () => {
                     href="https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:79f1e38d-db9e-437c-93f7-957ce35f99e8"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center gap-2 transition-colors"
+                    className="px-6 py-2 bg-border-color hover:bg-border-color/80 border border-border-color rounded-full flex items-center gap-2 transition-colors"
                 >
                     <Download size={18} /> Download PDF
                 </a>
@@ -58,7 +58,7 @@ const Resume = () => {
                             <h3 className="text-lg font-bold mb-3">Technical</h3>
                             <div className="flex flex-wrap gap-2">
                                 {['JavaScript', 'React', 'Node.js', 'Python', 'SQL', 'IT Audit', 'Cybersecurity'].map(skill => (
-                                    <span key={skill} className="px-3 py-1 bg-white/5 rounded-md text-sm border border-white/10">
+                                    <span key={skill} className="px-3 py-1 bg-border-color rounded-md text-sm border border-border-color">
                                         {skill}
                                     </span>
                                 ))}

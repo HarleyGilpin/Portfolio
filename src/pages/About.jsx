@@ -12,7 +12,7 @@ const About = () => {
             <div className="space-y-12 max-w-4xl mx-auto">
                 {/* Intro / UVP */}
                 <div className="glass-panel p-8 md:p-10">
-                    <h2 className="text-2xl font-bold mb-4 text-white">The Intersection of Marketing & Development</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-text-primary">The Intersection of Marketing & Development</h2>
                     <p className="text-lg text-text-secondary leading-relaxed">
                         I bridge the gap between building products and growing them. As a Digital Marketer, Full Stack Developer, and IT Auditor,
                         I bring a unique full-funnel perspective to every project. I don't just write code; I build data-driven solutions that
@@ -22,13 +22,13 @@ const About = () => {
 
                 {/* Background */}
                 <div className="glass-panel p-8 md:p-10">
-                    <h2 className="text-2xl font-bold mb-4 text-white">My Journey</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-text-primary">My Journey</h2>
                     <div className="space-y-4 text-text-secondary leading-relaxed">
                         <p>
                             I bring over <strong>a decade of professional experience designing websites</strong>, combined with deep expertise in the cybersecurity and accounting fields. As an IT Auditor, I apply a security-first mindset to every project. I have <strong>passed my CISA exam</strong> and am currently building my skillset in defensive security while working towards full certification.
                         </p>
                         <p>
-                            I also specialize in building business automation workflows, streamlining operations using <span className="text-white font-medium">Python</span>, <span className="text-white font-medium">Alteryx Designer</span>, and the <span className="text-white font-medium">Microsoft Power Platform</span>.
+                            I also specialize in building business automation workflows, streamlining operations using <span className="text-text-primary font-medium">Python</span>, <span className="text-text-primary font-medium">Alteryx Designer</span>, and the <span className="text-text-primary font-medium">Microsoft Power Platform</span>.
                         </p>
                         <p>
                             My diverse background spans across multiple industries including <strong>Accounting, Music, Gaming, Fitness, and Construction</strong>.
@@ -63,7 +63,7 @@ const About = () => {
 
                 {/* Personal */}
                 <div className="glass-panel p-8 md:p-10">
-                    <h2 className="text-2xl font-bold mb-4 text-white">Beyond the Code</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-text-primary">Beyond the Code</h2>
                     <p className="text-text-secondary leading-relaxed">
                         When I'm not optimizing workflows or debugging code, you can find me on the slopes <strong>snowboarding</strong>,
                         on the trails <strong>running</strong>, or staying active.
@@ -74,7 +74,7 @@ const About = () => {
 
                 {/* CTA */}
                 <div className="text-center py-8">
-                    <p className="text-xl text-white mb-8">Ready to leverage this unique skillset for your next project?</p>
+                    <p className="text-xl text-text-primary mb-8">Ready to leverage this unique skillset for your next project?</p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link to="/services" className="px-8 py-3 rounded-lg font-bold bg-[var(--accent-primary)] text-black hover:opacity-90 transition-opacity">
                             View My Services

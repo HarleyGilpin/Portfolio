@@ -45,7 +45,7 @@ const Projects = () => {
                         onClick={() => setFilter(category)}
                         className={`px-4 py-2 rounded-full border transition-all whitespace-nowrap ${filter === category
                             ? 'bg-accent-primary text-bg-primary border-accent-primary font-bold'
-                            : 'bg-transparent border-white/10 text-text-secondary hover:border-accent-primary/50 hover:text-white'
+                            : 'bg-transparent border-white/10 text-text-secondary hover:border-accent-primary/50 hover:text-text-primary'
                             }`}
                     >
                         {category}
@@ -59,10 +59,10 @@ const Projects = () => {
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-2xl font-bold">{project.title}</h3>
                             <div className="flex gap-3">
-                                <a href={project.link} className="text-text-secondary hover:text-white transition-colors">
+                                <a href={project.link} className="text-text-secondary hover:text-text-primary transition-colors">
                                     <Github size={20} />
                                 </a>
-                                <a href={project.link} className="text-text-secondary hover:text-white transition-colors">
+                                <a href={project.link} className="text-text-secondary hover:text-text-primary transition-colors">
                                     <ExternalLink size={20} />
                                 </a>
                             </div>

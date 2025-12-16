@@ -31,13 +31,13 @@ const Home = () => {
                         <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
                             <Link
                                 to="/projects"
-                                className="px-8 py-3 bg-accent-primary text-bg-primary font-bold rounded-full hover:bg-white transition-colors flex items-center justify-center gap-2"
+                                className="px-8 py-3 bg-accent-primary text-black font-bold rounded-full hover:bg-white transition-colors flex items-center justify-center gap-2"
                             >
                                 View Projects <ArrowRight size={20} />
                             </Link>
                             <Link
                                 to="/contact"
-                                className="px-8 py-3 border border-white/20 rounded-full hover:bg-white/5 transition-colors"
+                                className="px-8 py-3 border border-border-color rounded-full hover:bg-border-color transition-colors"
                             >
                                 Contact Me
                             </Link>

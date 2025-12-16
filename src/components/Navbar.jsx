@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Code2 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -28,7 +29,7 @@ const Navbar = () => {
                 <div className="flex justify-between items-center h-16">
                     <Link to="/" className="flex items-center gap-2 text-xl font-bold font-space-grotesk">
                         <Code2 className="text-accent-primary" />
-                        <span className="text-white">Harley<span className="text-accent-primary">Gilpin</span></span>
+                        <span className="text-text-primary">Harley<span className="text-accent-primary">Gilpin</span></span>
                     </Link>
 
                     {/* Desktop Menu */}
@@ -43,11 +44,12 @@ const Navbar = () => {
                                 {link.name}
                             </Link>
                         ))}
+                        <ThemeToggle />
                     </div>
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden text-white"
+                        className="md:hidden text-text-primary"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? <X /> : <Menu />}
@@ -70,6 +72,10 @@ const Navbar = () => {
                                 {link.name}
                             </Link>
                         ))}
+                        <div className="flex items-center justify-between text-base font-medium text-text-secondary">
+                            <span>Theme</span>
+                            <ThemeToggle />
+                        </div>
                     </div>
                 </div>
             )}

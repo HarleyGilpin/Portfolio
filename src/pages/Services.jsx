@@ -249,7 +249,7 @@ const Services = () => {
                 </p>
                 <button
                     onClick={() => window.scrollTo({ top: document.querySelector('.grid-cols-1').offsetTop - 100, behavior: 'smooth' })}
-                    className="bg-accent-primary hover:bg-accent-secondary text-background font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105"
+                    className="bg-accent-primary hover:bg-accent-secondary text-black font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105"
                 >
                     View Tiers & Start
                 </button>
