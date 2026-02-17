@@ -102,7 +102,8 @@ This project is optimized for deployment on **Vercel**.
 1.  Push your code to GitHub.
 2.  Import the project into Vercel.
 3.  Add all **Environment Variables** in the Vercel Project Settings.
-4.  **Stripe Webhook Configuration**:
+4.  **Output Directory**: Ensure the Output Directory is set to `build/client` (or use the included `vercel.json`).
+5.  **Stripe Webhook Configuration**:
     - Add endpoint: `https://your-domain.com/api/stripe-webhook`
     - Events: `checkout.session.completed`, `customer.subscription.deleted`, `customer.subscription.updated`, `invoice.payment_failed`
 5.  Deploy!
