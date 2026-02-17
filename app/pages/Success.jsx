@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaFileContract, FaHome, FaDownload } from 'react-icons/fa';
 import { toast } from 'sonner';

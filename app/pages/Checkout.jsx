@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { FaLock, FaCreditCard, FaArrowRight, FaServer, FaRocket, FaCrown, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'sonner';

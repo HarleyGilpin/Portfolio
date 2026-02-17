@@ -9,10 +9,10 @@ export const BlogProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [adminToken, setAdminToken] = useState(() => {
-        return localStorage.getItem('adminToken');
+        return typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
     });
     const [isAdmin, setIsAdmin] = useState(() => {
-        return !!localStorage.getItem('adminToken');
+        return typeof window !== 'undefined' ? !!localStorage.getItem('adminToken') : false;
     });
 
     // Fetch posts from API

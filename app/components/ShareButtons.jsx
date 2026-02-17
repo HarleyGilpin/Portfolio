@@ -1,8 +1,8 @@
 import React from 'react';
 
 const ShareButtons = ({ title, url }) => {
-    const encodedUrl = encodeURIComponent(url || window.location.href);
-    const encodedTitle = encodeURIComponent(title || document.title);
+    const encodedUrl = encodeURIComponent(url || (typeof window !== 'undefined' ? window.location.href : ''));
+    const encodedTitle = encodeURIComponent(title || (typeof document !== 'undefined' ? document.title : ''));
 
     const shareLinks = [
         {

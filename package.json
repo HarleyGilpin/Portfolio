@@ -4,13 +4,15 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "react-router dev",
+    "build": "react-router build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "react-router-serve ./build/server/index.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
+    "@react-router/node": "^7.13.0",
     "@stripe/stripe-js": "^8.5.3",
     "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.10.0",
@@ -20,6 +22,7 @@
     "dompurify": "^3.3.0",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.25",
+    "isbot": "^5",
     "lucide-react": "^0.554.0",
     "quill-blot-formatter": "^1.0.5",
     "react": "^19.2.0",
@@ -27,13 +30,14 @@
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
     "react-quill-new": "^3.6.0",
-    "react-router-dom": "^7.9.6",
+    "react-router-dom": "^7.13.0",
     "sonner": "^2.0.7",
     "stripe": "^20.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@react-router/dev": "^7.13.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

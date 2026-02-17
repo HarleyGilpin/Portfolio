@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import SEO from '../components/SEO';
 import ProfilePic from '../assets/profile-pic.webp';
 

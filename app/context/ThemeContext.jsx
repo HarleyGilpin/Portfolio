@@ -8,8 +8,9 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState(() => {
+        if (typeof window === 'undefined') return 'dark';
         // Check local storage first
-        const savedTheme = localStorage.getItem('theme');
+        const savedTheme = window.localStorage.getItem('theme');
         if (savedTheme) {
             return savedTheme;
         }

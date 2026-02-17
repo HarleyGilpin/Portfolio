@@ -23,7 +23,8 @@ The site automates core agency operations by connecting Stripe events directly t
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Vite, Tailwind CSS
+- **Frontend**: React 19, React Router v7 (Framework Mode), Tailwind CSS
+- **Architecture**: Static Site Generation (SSG) with SPA Fallback
 - **Backend**: Vercel Serverless Functions (Node.js)
 - **Database**: Neon (PostgreSQL) via `@vercel/postgres`
 - **Automation**: Stripe Webhooks -> Linear GraphQL API
@@ -79,6 +80,20 @@ LINEAR_TEAM_ID=your_team_id
 npx vercel dev
 ```
 The application will be available at `http://localhost:3000`.
+
+To run the frontend only (for UI development):
+```bash
+npm run dev
+```
+
+### 5. Build for Production
+```bash
+npm run build
+```
+This generates static HTML files in `build/client/`. To preview the build locally:
+```bash
+npm run preview
+```
 
 ## 🚀 Deployment
 

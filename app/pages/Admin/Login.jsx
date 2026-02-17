@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useBlog } from '../../context/BlogContext';
 import { Lock } from 'lucide-react';
 import SEO from '../../components/SEO';
