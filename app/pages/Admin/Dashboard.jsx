@@ -1,36 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
-// Only import Quill-related modules on the client (they require `document`)
-let ReactQuill = null;
-let Quill = null;
-
-if (typeof document !== 'undefined') {
-    const quillModule = require('react-quill-new');
-    ReactQuill = quillModule.default;
-    Quill = quillModule.Quill;
-    require('react-quill-new/dist/quill.snow.css');
-    const BlotFormatter = require('quill-blot-formatter/dist/BlotFormatter').default;
-
-    // Custom Divider Blot
-    const BlockEmbed = Quill.import('blots/block/embed');
-    class DividerBlot extends BlockEmbed { }
-    DividerBlot.blotName = 'divider';
-    DividerBlot.tagName = 'hr';
-    Quill.register(DividerBlot);
-
-    Quill.register('modules/blotFormatter', BlotFormatter);
-}
-
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout, adminToken } = useBlog();
     const [isEditing, setIsEditing] = useState(false);
     const [currentPost, setCurrentPost] = useState({ title: '', content: '', excerpt: '', image: '', category: '', keywords: '' });
     const [isUploading, setIsUploading] = useState(false);
+
+    // Dynamically load Quill on the client (it requires `document`)
+    const [ReactQuill, setReactQuill] = useState(null);
+
+    useEffect(() => {
+        async function loadQuill() {
+            const quillModule = await import('react-quill-new');
+            const { Quill } = quillModule;
+            await import('react-quill-new/dist/quill.snow.css');
+            const BlotFormatterModule = await import('quill-blot-formatter/dist/BlotFormatter');
+            const BlotFormatter = BlotFormatterModule.default;
+
+            // Custom Divider Blot
+            const BlockEmbed = Quill.import('blots/block/embed');
+            class DividerBlot extends BlockEmbed { }
+            DividerBlot.blotName = 'divider';
+            DividerBlot.tagName = 'hr';
+            Quill.register(DividerBlot);
+            Quill.register('modules/blotFormatter', BlotFormatter);
+
+            setReactQuill(() => quillModule.default);
+        }
+        loadQuill();
+    }, []);
 
     const handleImageUpload = async (file) => {
         setIsUploading(true);
