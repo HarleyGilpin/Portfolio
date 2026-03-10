@@ -93,6 +93,6 @@ This document serves as the binding confirmation of the services and terms agree
 
     } catch (error) {
         console.error('Verify API Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 }

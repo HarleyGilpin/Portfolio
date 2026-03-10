@@ -201,6 +201,6 @@ This Agreement is governed by the laws of the Provider's principal place of busi
 
     } catch (error) {
         console.error('API Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 }

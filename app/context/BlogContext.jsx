@@ -9,10 +9,10 @@ export const BlogProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [adminToken, setAdminToken] = useState(() => {
-        return typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+        return typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null;
     });
     const [isAdmin, setIsAdmin] = useState(() => {
-        return typeof window !== 'undefined' ? !!localStorage.getItem('adminToken') : false;
+        return typeof window !== 'undefined' ? !!localStorage.getItem('sessionToken') : false;
     });
 
     // Fetch posts from API
@@ -49,10 +49,11 @@ export const BlogProvider = ({ children }) => {
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.token) {
                 setIsAdmin(true);
-                setAdminToken(password);
-                localStorage.setItem('adminToken', password);
+                // Store the SESSION TOKEN (not the password!)
+                setAdminToken(data.token);
+                localStorage.setItem('sessionToken', data.token);
                 return { success: true };
             }
 
@@ -66,7 +67,7 @@ export const BlogProvider = ({ children }) => {
     const logout = () => {
         setIsAdmin(false);
         setAdminToken(null);
-        localStorage.removeItem('adminToken');
+        localStorage.removeItem('sessionToken');
     };
 
     const addPost = async (post) => {

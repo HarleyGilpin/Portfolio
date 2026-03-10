@@ -7,6 +7,8 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "preview": "vite preview",
     "start": "react-router-serve ./build/server/index.js"
   },
@@ -49,7 +51,8 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18",
-    "vite": "^5.4.0"
+    "vite": "^5.4.0",
+    "vitest": "^4.0.18"
   },
   "overrides": {
     "quill": "^2.0.3",

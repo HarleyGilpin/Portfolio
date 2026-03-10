@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import { createSession, verifyPassword } from './utils/verify-session.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
             return res.status(429).json({ error: `Too many attempts. Please try again in ${waitTime} minutes.` });
         }
 
-        if (password === process.env.VITE_ADMIN_PASSWORD) {
+        if (verifyPassword(password)) {
             // Reset attempts on success
             await sql`
                 INSERT INTO login_attempts (ip_address, attempts, locked_until)
@@ -33,7 +34,11 @@ export default async function handler(req, res) {
                 ON CONFLICT (ip_address)
                 DO UPDATE SET attempts = 0, locked_until = NULL
             `;
-            return res.status(200).json({ success: true });
+
+            // Create a session token (not the password!)
+            const token = await createSession('admin');
+
+            return res.status(200).json({ success: true, token });
         } else {
             // Increment attempts on failure
             const newAttempts = (attemptRecord?.attempts || 0) + 1;

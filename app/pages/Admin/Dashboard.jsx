@@ -1,21 +1,30 @@
 import React, { useState } from 'react';
-import ReactQuill, { Quill } from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
-import BlotFormatter from 'quill-blot-formatter/dist/BlotFormatter';
 import { useBlog } from '../../context/BlogContext';
 import { Plus, Edit, Trash2, LogOut } from 'lucide-react';
 import SEO from '../../components/SEO';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
-// Custom Divider Blot
-const BlockEmbed = Quill.import('blots/block/embed');
-class DividerBlot extends BlockEmbed { }
-DividerBlot.blotName = 'divider';
-DividerBlot.tagName = 'hr';
-Quill.register(DividerBlot);
+// Only import Quill-related modules on the client (they require `document`)
+let ReactQuill = null;
+let Quill = null;
 
-Quill.register('modules/blotFormatter', BlotFormatter);
+if (typeof document !== 'undefined') {
+    const quillModule = require('react-quill-new');
+    ReactQuill = quillModule.default;
+    Quill = quillModule.Quill;
+    require('react-quill-new/dist/quill.snow.css');
+    const BlotFormatter = require('quill-blot-formatter/dist/BlotFormatter').default;
+
+    // Custom Divider Blot
+    const BlockEmbed = Quill.import('blots/block/embed');
+    class DividerBlot extends BlockEmbed { }
+    DividerBlot.blotName = 'divider';
+    DividerBlot.tagName = 'hr';
+    Quill.register(DividerBlot);
+
+    Quill.register('modules/blotFormatter', BlotFormatter);
+}
 
 const Dashboard = () => {
     const { posts, addPost, updatePost, deletePost, logout, adminToken } = useBlog();
@@ -29,7 +38,10 @@ const Dashboard = () => {
         try {
             const newBlob = await upload(file.name, file, {
                 access: 'public',
-                handleUploadUrl: `/api/upload?auth=${encodeURIComponent(adminToken)}`,
+                handleUploadUrl: '/api/upload',
+                headers: {
+                    'x-admin-auth': adminToken,
+                },
             });
             console.log('Client-side upload success:', newBlob);
             toast.success('Image uploaded successfully', { id: toastId });
@@ -243,13 +255,17 @@ const Dashboard = () => {
                     </div>
 
                     <div className="bg-white text-black rounded-lg overflow-hidden h-[300px] mb-12 relative">
-                        <ReactQuill
-                            theme="snow"
-                            value={currentPost.content}
-                            onChange={(content) => setCurrentPost({ ...currentPost, content })}
-                            className="h-[250px]"
-                            modules={modules}
-                        />
+                        {ReactQuill ? (
+                            <ReactQuill
+                                theme="snow"
+                                value={currentPost.content}
+                                onChange={(content) => setCurrentPost({ ...currentPost, content })}
+                                className="h-[250px]"
+                                modules={modules}
+                            />
+                        ) : (
+                            <div className="h-[250px] flex items-center justify-center text-gray-400">Loading editor...</div>
+                        )}
                         {isUploading && (
                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
                                 <div className="bg-bg-primary px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
