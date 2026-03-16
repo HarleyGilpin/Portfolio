@@ -19,6 +19,11 @@ export default [
     route("checkout", "./pages/Checkout.jsx"),
     route("success", "./pages/Success.jsx"),
     route("portal", "./pages/Portal.jsx"),
-    route("admin", "./pages/Admin/Dashboard.jsx"),
+
+    // Admin protected route — requires auth to view
+    layout("./components/ProtectedRoute.jsx", [
+        route("admin", "./pages/Admin/Dashboard.jsx"),
+    ]),
+
     route("*", "./pages/NotFound.jsx"),
 ] satisfies RouteConfig;

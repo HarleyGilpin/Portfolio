@@ -1,59 +1,86 @@
 
 import { sql } from '@vercel/postgres';
 import Stripe from 'stripe';
+import { rateLimit } from './utils/rate-limit.js';
+import { validateOrigin } from './utils/csrf.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Server-side tier definitions — the single source of truth for pricing
+const TIERS = {
+    '0': { name: 'Starter Task', price: 10 },
+    '1': { name: 'Basic Boost', price: 25 },
+    '2': { name: 'Growth Pack', price: 50 },
+    '3': { name: 'Pro Build', price: 100 },
+    '4': { name: 'Advanced Strategy', price: 200 },
+    '5': { name: 'Business Accelerator', price: 250 },
+    '6': { name: 'Agency Package', price: 500 },
+    '7': { name: 'Enterprise Solution', price: 1000 },
+};
+
+const HOSTING_TIERS = {
+    'managed': { name: 'Managed Hosting', price: 29 },
+    'business': { name: 'Business Hosting', price: 60 },
+    'premium': { name: 'Premium Hosting + Care', price: 120 },
+};
+
+// Allowed origin for redirect URLs
+const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://harleygilpin.com';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // CSRF protection
+    const csrf = validateOrigin(req);
+    if (!csrf.valid) {
+        return res.status(csrf.status).json(csrf.body);
+    }
+
+    // Rate limit: 10 checkout attempts per minute per IP
+    const rl = rateLimit(req, { maxRequests: 10, windowMs: 60_000, keyPrefix: 'checkout' });
+    if (rl.limited) {
+        return res.status(429).json(rl.body);
+    }
+
     try {
         const {
             tierId,
-            tierName,
-            price,
             clientName,
             clientEmail,
             projectDetails,
             deadline,
-            // Hosting add-on data
             hostingTier,
-            hostingName,
-            hostingPrice
         } = req.body;
 
-        // 1. Create Order in Database (Pending)
-        // Create table if it doesn't exist
-        await sql`
-          CREATE TABLE IF NOT EXISTS orders (
-            id SERIAL PRIMARY KEY,
-            tier_name VARCHAR(255),
-            price DECIMAL,
-            client_name VARCHAR(255),
-            client_email VARCHAR(255),
-            project_details TEXT,
-            deadline VARCHAR(255),
-            status VARCHAR(50),
-            stripe_session_id VARCHAR(255),
-            agreement_content TEXT,
-            hosting_tier VARCHAR(100),
-            hosting_price DECIMAL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          );
-        `;
-
-        // Add hosting columns if they don't exist (for existing tables)
-        try {
-            await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS hosting_tier VARCHAR(100);`;
-            await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS hosting_price DECIMAL;`;
-        } catch (e) {
-            // Columns might already exist, ignore error
-            console.log('Hosting columns may already exist:', e.message);
+        // Input validation
+        if (!tierId || !clientName || !clientEmail) {
+            return res.status(400).json({ error: 'Missing required fields: tierId, clientName, clientEmail' });
         }
 
-        // 2. Generate Full Service Agreement
+        // Server-side tier lookup — never trust client-supplied price
+        const tier = TIERS[tierId];
+        if (!tier) {
+            return res.status(400).json({ error: 'Invalid tier ID' });
+        }
+
+        // Validate hosting tier if provided
+        let hostingSelection = null;
+        if (hostingTier && hostingTier !== 'none') {
+            hostingSelection = HOSTING_TIERS[hostingTier];
+            if (!hostingSelection) {
+                return res.status(400).json({ error: 'Invalid hosting tier' });
+            }
+        }
+
+        // Use server-side prices
+        const price = tier.price;
+        const tierName = tier.name;
+        const hostingName = hostingSelection?.name || null;
+        const hostingPrice = hostingSelection?.price || 0;
+
+        // Generate Service Agreement
         const currentDate = new Date().toLocaleDateString();
         let agreementContent = `
 SERVICE AGREEMENT
@@ -98,7 +125,7 @@ This Agreement is governed by the laws of the Provider's principal place of busi
 `.trim();
 
         // Append Hosting Addendum if applicable
-        if (hostingTier) {
+        if (hostingSelection) {
             agreementContent += `
 
 12. HOSTING SERVICES ADDENDUM
@@ -110,19 +137,17 @@ This Agreement is governed by the laws of the Provider's principal place of busi
 
         const { rows } = await sql`
           INSERT INTO orders (tier_name, price, client_name, client_email, project_details, deadline, status, hosting_tier, hosting_price, agreement_content)
-          VALUES (${tierName}, ${price}, ${clientName}, ${clientEmail}, ${projectDetails}, ${deadline}, 'pending', ${hostingTier || null}, ${hostingPrice || 0}, ${agreementContent})
+          VALUES (${tierName}, ${price}, ${clientName}, ${clientEmail}, ${projectDetails || ''}, ${deadline || ''}, 'pending', ${hostingTier || null}, ${hostingPrice}, ${agreementContent})
           RETURNING id;
         `;
 
         const orderId = rows[0].id;
 
-        // 2. Build line items array
+        // Build line items array
         const lineItems = [];
 
-        // One-time service fee (always present)
-        if (hostingTier) {
-            // For subscription mode: one-time items are passed without recurring data
-            // Stripe Checkout supports mixed one-time and recurring items in subscription mode
+        if (hostingSelection) {
+            // One-time service fee
             lineItems.push({
                 price_data: {
                     currency: 'usd',
@@ -131,7 +156,6 @@ This Agreement is governed by the laws of the Provider's principal place of busi
                         description: `Project execution for ${clientName}`,
                     },
                     unit_amount: price * 100,
-                    // No recurring field means it's one-time
                 },
                 quantity: 1,
             });
@@ -164,13 +188,13 @@ This Agreement is governed by the laws of the Provider's principal place of busi
             });
         }
 
-        // 3. Create Stripe Checkout Session
+        // Create Stripe Checkout Session with hardcoded origin
         const sessionConfig = {
             payment_method_types: ['card'],
             line_items: lineItems,
-            mode: hostingTier ? 'subscription' : 'payment',
-            success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${req.headers.origin}/checkout?tier=${tierId}`,
+            mode: hostingSelection ? 'subscription' : 'payment',
+            success_url: `${ALLOWED_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${ALLOWED_ORIGIN}/checkout?tier=${tierId}`,
             customer_email: clientEmail,
             metadata: {
                 orderId: orderId.toString(),
@@ -178,8 +202,7 @@ This Agreement is governed by the laws of the Provider's principal place of busi
             },
         };
 
-        // For subscriptions, payment behavior defaults to 'allow_incomplete'
-        if (hostingTier) {
+        if (hostingSelection) {
             sessionConfig.subscription_data = {
                 metadata: {
                     orderId: orderId.toString(),
@@ -190,7 +213,7 @@ This Agreement is governed by the laws of the Provider's principal place of busi
 
         const session = await stripe.checkout.sessions.create(sessionConfig);
 
-        // 4. Update Order with Session ID
+        // Update Order with Session ID
         await sql`
           UPDATE orders 
           SET stripe_session_id = ${session.id}
@@ -200,7 +223,7 @@ This Agreement is governed by the laws of the Provider's principal place of busi
         return res.status(200).json({ url: session.url });
 
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('Checkout API error:', { timestamp: new Date().toISOString() });
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 }

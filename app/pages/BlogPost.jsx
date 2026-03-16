@@ -27,7 +27,7 @@ const BlogPost = () => {
             ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'div', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'img', 'span', 'hr', 'pre', 'code'],
             ALLOWED_ATTR: ['href', 'target', 'src', 'alt', 'class', 'className', 'style', 'width', 'height', 'data-list']
         })
-        : post.content;
+        : ''; // Safe fallback during SSR — content renders on hydration
     const [scrollProgress, setScrollProgress] = React.useState(0);
 
     React.useEffect(() => {

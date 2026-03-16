@@ -71,18 +71,20 @@ This Agreement shall be governed by the laws of the Provider's principal place o
 This document serves as the binding confirmation of the services and terms agreed to by the parties.
     `.trim();
 
-        // 3. Update Order in Database
-        // We update the status to 'paid' and save the agreement
+        // 3. Update Order in Database — return only public-safe fields
         const { rows } = await sql`
       UPDATE orders 
       SET status = 'paid', agreement_content = ${agreementText}
       WHERE id = ${orderId} AND stripe_session_id = ${session_id}
-      RETURNING *;
+      RETURNING id, tier_name, price, client_name, agreement_content, hosting_tier, hosting_price;
     `;
 
         if (rows.length === 0) {
             // Only fetch if already 'paid'
-            const { rows: existingRows } = await sql`SELECT * FROM orders WHERE stripe_session_id = ${session_id}`;
+            const { rows: existingRows } = await sql`
+                SELECT id, tier_name, price, client_name, agreement_content, hosting_tier, hosting_price
+                FROM orders WHERE stripe_session_id = ${session_id}
+            `;
             if (existingRows.length > 0) {
                 return res.status(200).json({ order: existingRows[0] });
             }

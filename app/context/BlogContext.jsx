@@ -64,7 +64,18 @@ export const BlogProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        // Invalidate server-side session before clearing local state
+        if (adminToken) {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'x-admin-auth': adminToken },
+                });
+            } catch {
+                // Still clear local state even if server call fails
+            }
+        }
         setIsAdmin(false);
         setAdminToken(null);
         localStorage.removeItem('sessionToken');

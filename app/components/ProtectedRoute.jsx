@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 import { useBlog } from '../context/BlogContext';
 
 const ProtectedRoute = ({ children }) => {
@@ -9,7 +9,8 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/admin/login" replace />;
     }
 
-    return children;
+    // Support both layout (Outlet) and wrapper (children) usage
+    return children || <Outlet />;
 };
 
 export default ProtectedRoute;

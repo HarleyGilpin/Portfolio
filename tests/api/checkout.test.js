@@ -53,10 +53,11 @@ describe('POST /api/create-checkout-session', () => {
     });
 
     it('error response does NOT leak internal details', async () => {
-        // Force an error
-        sql.mockRejectedValueOnce(new Error('relation "orders" does not exist'));
+        // Force an error after validation passes
+        sql.mockRejectedValue(new Error('relation "orders" does not exist'));
 
         const { req, res } = createMockReqRes('POST', {
+            tierId: '0',
             tierName: 'Test',
             price: 100,
             clientName: 'Test User',

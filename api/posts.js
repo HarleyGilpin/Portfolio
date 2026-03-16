@@ -1,7 +1,22 @@
 import { sql } from '@vercel/postgres';
 import { requireAuth } from './utils/verify-session.js';
+import { rateLimit } from './utils/rate-limit.js';
+import { validateOrigin } from './utils/csrf.js';
 
 export default async function handler(req, res) {
+    // CSRF protection for state-changing methods
+    const csrf = validateOrigin(req);
+    if (!csrf.valid) {
+        return res.status(csrf.status).json(csrf.body);
+    }
+
+    // Rate limit: 30 reads or 10 writes per minute per IP
+    const limit = req.method === 'GET' ? 30 : 10;
+    const rl = rateLimit(req, { maxRequests: limit, windowMs: 60_000, keyPrefix: 'posts' });
+    if (rl.limited) {
+        return res.status(429).json(rl.body);
+    }
+
     if (req.method === 'GET') {
         try {
             const { rows } = await sql`SELECT * FROM posts ORDER BY created_at DESC`;

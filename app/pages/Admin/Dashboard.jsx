@@ -46,7 +46,7 @@ const Dashboard = () => {
                     'x-admin-auth': adminToken,
                 },
             });
-            console.log('Client-side upload success:', newBlob);
+            // Upload success
             toast.success('Image uploaded successfully', { id: toastId });
             return newBlob.url;
         } catch (error) {
