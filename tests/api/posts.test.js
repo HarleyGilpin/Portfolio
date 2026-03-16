@@ -10,12 +10,20 @@ import handler from '../../api/posts.js';
 
 function createMockReqRes(method = 'GET', body = {}, headers = {}) {
     return {
-        req: { method, body, headers },
+        req: { 
+            method, 
+            body, 
+            headers: {
+                origin: 'https://harleygilpin.com',
+                ...headers
+            } 
+        },
         res: {
             statusCode: null,
             body: null,
             status(code) { this.statusCode = code; return this; },
             json(data) { this.body = data; return this; },
+            setHeader: vi.fn(),
         },
     };
 }
@@ -46,14 +54,12 @@ describe('/api/posts', () => {
 
     it('POST — rejects invalid session tokens', async () => {
         // Mock session lookup returning empty (invalid token)
-        sql.mockResolvedValueOnce({ rows: [] }); // sessions table create
-        sql.mockResolvedValueOnce({ rows: [] }); // expired session cleanup
         sql.mockResolvedValueOnce({ rows: [] }); // session lookup (not found)
 
         const { req, res } = createMockReqRes('POST', {
             title: 'New Post',
             slug: 'new-post',
-        }, { 'x-admin-auth': 'invalid-token-that-is-at-least-32-chars-long' });
+        }, { 'cookie': 'sessionToken=invalid-token-that-is-at-least-32-chars-long' });
         await handler(req, res);
         expect(res.statusCode).toBe(401);
     });

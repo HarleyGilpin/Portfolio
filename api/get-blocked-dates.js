@@ -6,6 +6,13 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Rate limit: 30 fetches per minute per IP
+    const { rateLimit } = await import('./utils/rate-limit.js');
+    const rl = rateLimit(req, { maxRequests: 30, windowMs: 60_000, keyPrefix: 'blocked-dates' });
+    if (rl.limited) {
+        return res.status(429).json(rl.body);
+    }
+
     try {
         // Fetch all deadlines from active orders
         // Exclude Cancelled or Rejected orders

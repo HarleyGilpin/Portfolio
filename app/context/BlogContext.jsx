@@ -8,12 +8,27 @@ export const BlogProvider = ({ children }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [adminToken, setAdminToken] = useState(() => {
-        return typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null;
-    });
-    const [isAdmin, setIsAdmin] = useState(() => {
-        return typeof window !== 'undefined' ? !!localStorage.getItem('sessionToken') : false;
-    });
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Initial Auth Check
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('/api/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    setIsAdmin(!!data.authenticated);
+                }
+            } catch (err) {
+                // Ignore initial auth check failure silently
+            }
+        };
+        
+        // Only run checkAuth on the client
+        if (typeof window !== 'undefined') {
+            checkAuth();
+        }
+    }, []);
 
     // Fetch posts from API
     const fetchPosts = async () => {
@@ -45,15 +60,13 @@ export const BlogProvider = ({ children }) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password }),
+                credentials: 'include' // Important: ensures the cookie is received and saved by the browser
             });
 
             const data = await response.json();
 
-            if (response.ok && data.token) {
+            if (response.ok) {
                 setIsAdmin(true);
-                // Store the SESSION TOKEN (not the password!)
-                setAdminToken(data.token);
-                localStorage.setItem('sessionToken', data.token);
                 return { success: true };
             }
 
@@ -65,20 +78,15 @@ export const BlogProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        // Invalidate server-side session before clearing local state
-        if (adminToken) {
-            try {
-                await fetch('/api/logout', {
-                    method: 'POST',
-                    headers: { 'x-admin-auth': adminToken },
-                });
-            } catch {
-                // Still clear local state even if server call fails
-            }
+        try {
+            await fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch {
+            // Still clear local state even if server call fails
         }
         setIsAdmin(false);
-        setAdminToken(null);
-        localStorage.removeItem('sessionToken');
     };
 
     const addPost = async (post) => {
@@ -92,9 +100,9 @@ export const BlogProvider = ({ children }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-auth': adminToken
                 },
                 body: JSON.stringify(newPost),
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error('Failed to create post');
@@ -113,9 +121,9 @@ export const BlogProvider = ({ children }) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-auth': adminToken
                 },
                 body: JSON.stringify(updatedPost),
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error('Failed to update post');
@@ -133,9 +141,7 @@ export const BlogProvider = ({ children }) => {
         try {
             const response = await fetch(`/api/post?id=${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'x-admin-auth': adminToken
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error('Failed to delete post');
@@ -151,7 +157,6 @@ export const BlogProvider = ({ children }) => {
         <BlogContext.Provider value={{
             posts,
             isAdmin,
-            adminToken,
             loading,
             error,
             login,

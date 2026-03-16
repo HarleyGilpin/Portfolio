@@ -24,6 +24,7 @@ function createMockReqRes(method = 'POST', body = {}, headers = {}) {
         body,
         headers: {
             'x-forwarded-for': '127.0.0.1',
+            origin: 'https://harleygilpin.com',
             ...headers,
         },
         socket: { remoteAddress: '127.0.0.1' },
@@ -40,6 +41,7 @@ function createMockReqRes(method = 'POST', body = {}, headers = {}) {
             this.body = data;
             return this;
         },
+        setHeader: vi.fn(),
     };
 
     return { req, res };
@@ -67,15 +69,22 @@ describe('POST /api/login', () => {
         expect(res.body.error).toBe('Password is required');
     });
 
-    it('returns a session token on valid login (not the password)', async () => {
+    it('returns a session token on valid login via Secure Cookie', async () => {
         const { req, res } = createMockReqRes('POST', { password: 'test-secret-password' });
         await handler(req, res);
         expect(res.statusCode).toBe(200);
         expect(res.body.success).toBe(true);
-        expect(res.body.token).toBeDefined();
-        // Token must NOT be the password
-        expect(res.body.token).not.toBe('test-secret-password');
-        expect(res.body.token.length).toBeGreaterThanOrEqual(32);
+        expect(res.body.token).toBeUndefined(); // Token should NO LONGER be in the body
+
+        // Check Set-Cookie was called
+        expect(res.setHeader).toHaveBeenCalledWith(
+            'Set-Cookie',
+            expect.stringContaining('sessionToken=')
+        );
+        expect(res.setHeader).toHaveBeenCalledWith(
+            'Set-Cookie',
+            expect.stringContaining('HttpOnly')
+        );
     });
 
     it('returns 401 with generic error for invalid password', async () => {

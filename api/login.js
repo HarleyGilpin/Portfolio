@@ -61,7 +61,10 @@ export default async function handler(req, res) {
             // Create a session token (not the password!)
             const token = await createSession('admin');
 
-            return res.status(200).json({ success: true, token });
+            // Set secure HttpOnly cookie
+            res.setHeader('Set-Cookie', `sessionToken=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`);
+
+            return res.status(200).json({ success: true });
         } else {
             if (!isDev) {
                 // Increment attempts on failure

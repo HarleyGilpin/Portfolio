@@ -99,7 +99,15 @@ export async function verifyPassword(password) {
  * Returns { authenticated: true } or { authenticated: false, response: {...} }
  */
 export async function requireAuth(req) {
-    const token = req.headers['x-admin-auth'];
+    const cookies = req.headers.cookie;
+    let token = null;
+
+    if (cookies) {
+        const tokenCookie = cookies.split(';').find(c => c.trim().startsWith('sessionToken='));
+        if (tokenCookie) {
+            token = tokenCookie.split('=')[1];
+        }
+    }
 
     if (!token) {
         return {

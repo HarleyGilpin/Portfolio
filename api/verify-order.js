@@ -15,6 +15,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing session_id' });
     }
 
+    // Rate limit: 20 verifications per minute per IP
+    const { rateLimit } = await import('./utils/rate-limit.js');
+    const rl = rateLimit(req, { maxRequests: 20, windowMs: 60_000, keyPrefix: 'verify-order' });
+    if (rl.limited) {
+        return res.status(429).json(rl.body);
+    }
+
     try {
         // 1. Retrieve the session from Stripe to verify payment status
         const session = await stripe.checkout.sessions.retrieve(session_id);

@@ -10,12 +10,19 @@ import handler from '../../api/logout.js';
 
 function createMockReqRes(method = 'POST', headers = {}) {
     return {
-        req: { method, headers },
+        req: { 
+            method, 
+            headers: {
+                origin: 'https://harleygilpin.com',
+                ...headers
+            } 
+        },
         res: {
             statusCode: null,
             body: null,
             status(code) { this.statusCode = code; return this; },
             json(data) { this.body = data; return this; },
+            setHeader: vi.fn(), // Mock the cookie setter
         },
     };
 }
@@ -41,7 +48,7 @@ describe('POST /api/logout', () => {
 
     it('returns success when a valid token is provided', async () => {
         const { req, res } = createMockReqRes('POST', {
-            'x-admin-auth': 'a'.repeat(64), // 64-char hex token
+            'cookie': `sessionToken=${'a'.repeat(64)}`,
         });
         await handler(req, res);
         expect(res.statusCode).toBe(200);
@@ -51,7 +58,7 @@ describe('POST /api/logout', () => {
     it('returns success even for invalid tokens (no information leak)', async () => {
         sql.mockResolvedValue({ rowCount: 0 }); // Token doesn't exist
         const { req, res } = createMockReqRes('POST', {
-            'x-admin-auth': 'b'.repeat(64),
+            'cookie': `sessionToken=${'b'.repeat(64)}`,
         });
         await handler(req, res);
         expect(res.statusCode).toBe(200);

@@ -43,10 +43,15 @@ export function validateOrigin(req) {
         }
     }
 
-    // Allow requests with no origin header (e.g., same-origin navigation,
-    // server-to-server like Stripe webhooks, curl, etc.)
+    // Explicitly DENY requests with no origin header for state-changing endpoints
+    // This closes a vulnerability where an attacker could use <meta name="referrer" content="no-referrer">
+    // to bypass CSRF checks.
     if (!requestOrigin) {
-        return { valid: true };
+        return {
+            valid: false,
+            status: 403,
+            body: { error: 'Forbidden - Missing origin/referer header' },
+        };
     }
 
     // Allow localhost on any port (development)
