@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
-import { createSession, verifyPassword } from './utils/verify-session.js';
-import { rateLimit } from './utils/rate-limit.js';
-import { validateOrigin } from './utils/csrf.js';
+import { createSession, verifyPassword } from './_utils/verify-session.js';
+import { rateLimit } from './_utils/rate-limit.js';
+import { validateOrigin } from './_utils/csrf.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {

@@ -1,5 +1,5 @@
-import { requireAuth } from './utils/verify-session.js';
-import { rateLimit } from './utils/rate-limit.js';
+import { requireAuth } from './_utils/verify-session.js';
+import { rateLimit } from './_utils/rate-limit.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET') {

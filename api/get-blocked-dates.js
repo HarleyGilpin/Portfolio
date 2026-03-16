@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     }
 
     // Rate limit: 30 fetches per minute per IP
-    const { rateLimit } = await import('./utils/rate-limit.js');
+    const { rateLimit } = await import('./_utils/rate-limit.js');
     const rl = rateLimit(req, { maxRequests: 30, windowMs: 60_000, keyPrefix: 'blocked-dates' });
     if (rl.limited) {
         return res.status(429).json(rl.body);

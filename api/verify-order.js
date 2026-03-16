@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     }
 
     // Rate limit: 20 verifications per minute per IP
-    const { rateLimit } = await import('./utils/rate-limit.js');
+    const { rateLimit } = await import('./_utils/rate-limit.js');
     const rl = rateLimit(req, { maxRequests: 20, windowMs: 60_000, keyPrefix: 'verify-order' });
     if (rl.limited) {
         return res.status(429).json(rl.body);

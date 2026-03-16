@@ -1,5 +1,5 @@
-import { deleteSession } from './utils/verify-session.js';
-import { validateOrigin } from './utils/csrf.js';
+import { deleteSession } from './_utils/verify-session.js';
+import { validateOrigin } from './_utils/csrf.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {

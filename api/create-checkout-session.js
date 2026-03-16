@@ -1,8 +1,8 @@
 
 import { sql } from '@vercel/postgres';
 import Stripe from 'stripe';
-import { rateLimit } from './utils/rate-limit.js';
-import { validateOrigin } from './utils/csrf.js';
+import { rateLimit } from './_utils/rate-limit.js';
+import { validateOrigin } from './_utils/csrf.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
