@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Shield, ShieldCheck, Lock, Search, Code, Palette, TrendingUp, Zap, Send, Loader2, ExternalLink } from 'lucide-react';
+import { ArrowRight, Shield, ShieldCheck, Lock, Search, Code, Palette, TrendingUp, Zap, Send, Loader2, ExternalLink, Award, CheckCircle2, Clock, Map } from 'lucide-react';
 import { Link } from 'react-router';
 import { motion, useInView } from 'framer-motion';
 import { toast } from 'sonner';
@@ -65,7 +65,7 @@ const useCounter = (target, duration = 2000, isVisible = false) => {
 };
 
 /* ─── Stat Card Component ─── */
-const StatCard = ({ value, suffix, label, isVisible }) => {
+const StatCard = ({ icon: Icon, value, suffix, label, isVisible }) => {
     const count = useCounter(value, 2000, isVisible);
     return (
         <motion.div
@@ -73,8 +73,13 @@ const StatCard = ({ value, suffix, label, isVisible }) => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-center"
+            className="text-center group"
         >
+            {Icon && (
+                <div className="mx-auto w-16 h-16 mb-5 bg-accent-primary/10 rounded-full flex items-center justify-center animate-float group-hover:bg-accent-primary/20 transition-colors">
+                    <Icon size={32} className="text-accent-primary drop-shadow-[0_0_8px_rgba(0,242,255,0.5)]" />
+                </div>
+            )}
             <div className="text-4xl md:text-5xl font-bold font-space-grotesk text-accent-primary mb-2">
                 {count}{suffix}
             </div>
@@ -314,10 +319,10 @@ const Home = () => {
             <section ref={statsRef} className="py-16 md:py-20">
                 <div className="container mx-auto px-4">
                     <div className="glass-panel p-10 md:p-14 grid grid-cols-2 md:grid-cols-4 gap-8 bg-gradient-to-r from-accent-primary/[0.04] to-accent-secondary/[0.04]">
-                        <StatCard value={10} suffix="+" label="Years Experience" isVisible={statsInView} />
-                        <StatCard value={50} suffix="+" label="Projects Delivered" isVisible={statsInView} />
-                        <StatCard value={100} suffix="%" label="Client Satisfaction" isVisible={statsInView} />
-                        <StatCard value={1} suffix="" label="CISA Certification" isVisible={statsInView} />
+                        <StatCard icon={Clock} value={10} suffix="+" label="Years Experience" isVisible={statsInView} />
+                        <StatCard icon={Award} value={50} suffix="+" label="Projects Delivered" isVisible={statsInView} />
+                        <StatCard icon={CheckCircle2} value={100} suffix="%" label="Client Satisfaction" isVisible={statsInView} />
+                        <StatCard icon={Map} value={360} suffix="°" label="Digital Expertise" isVisible={statsInView} />
                     </div>
                 </div>
             </section>
