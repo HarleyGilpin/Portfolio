@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import ProjectGeorgeWalcott from '../assets/project-georgewalcott.png';
 import ProjectAllDirt from '../assets/project-alldirt.png';
 import Project2011Scape from '../assets/project-2011scape.png';
+import ProjectPortfolio from '../assets/project-portfolio.png';
 
 const Projects = () => {
     const [filter, setFilter] = React.useState('All');
@@ -39,7 +40,8 @@ const Projects = () => {
             description: "A modern, futuristic portfolio website built with React and Vite, featuring a custom blog, admin dashboard, and cybersecurity-themed design.",
             tags: ["React", "Tailwind", "Vite"],
             category: "Web Dev",
-            link: "https://github.com/HarleyGilpin/Portfolio"
+            link: "https://harleygilpin.com",
+            image: ProjectPortfolio
         }
     ];
 
