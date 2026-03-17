@@ -323,3 +323,69 @@ button {
   color: var(--text-primary) !important;
   border-radius: 50%;
 }
+
+/* ═══ Landing Page Animations ═══ */
+
+/* Typing cursor blink */
+.typing-cursor {
+  display: inline-block;
+  color: var(--accent-primary);
+  animation: blink 1s step-end infinite;
+  font-weight: 300;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Rotating gradient border for profile photo */
+.gradient-rotate-border {
+  background: conic-gradient(
+    from var(--gradient-angle, 0deg),
+    var(--accent-primary),
+    var(--accent-secondary),
+    var(--accent-primary)
+  );
+  animation: gradient-rotate 4s linear infinite;
+}
+
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes gradient-rotate {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+/* Fallback for browsers that don't support @property */
+@supports not (background: conic-gradient(from 0deg, red, blue)) {
+  .gradient-rotate-border {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  }
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(0, 242, 255, 0.25); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
