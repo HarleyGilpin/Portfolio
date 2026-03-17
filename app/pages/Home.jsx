@@ -131,10 +131,10 @@ const Home = () => {
     };
 
     const cyberCards = [
-        { icon: ShieldCheck, title: 'IT Audit & Compliance', desc: 'Comprehensive IT audits aligned with frameworks like SOX, COBIT, and NIST to protect your organization.' },
+        { icon: ShieldCheck, title: 'IT Audit & Compliance', desc: 'Expertise in conducting SOC 1 and SOC 2 audits, integrating NIST framework principles to ensure robust security and compliance.' },
         { icon: Lock, title: 'Security Architecture', desc: 'Designing secure systems from the ground up with defense-in-depth strategies and zero-trust principles.' },
         { icon: Search, title: 'Vulnerability Assessment', desc: 'Identifying weaknesses in your infrastructure before attackers do, with actionable remediation plans.' },
-        { icon: Shield, title: 'CISA Certified', desc: 'Passed the Certified Information Systems Auditor exam, demonstrating deep expertise in IS audit and control.' },
+        { icon: Shield, title: 'CISA Certified', desc: 'Professional IT Auditor with ISACA certification, bringing a security and compliance-first mindset to every project.' },
     ];
 
     const services = [
