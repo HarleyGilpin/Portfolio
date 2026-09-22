@@ -12,6 +12,8 @@ async function setup() {
         excerpt TEXT,
         content TEXT,
         image TEXT,
+        category VARCHAR(255),
+        keywords TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
@@ -48,6 +50,17 @@ async function setup() {
       );
     `;
     console.log('Table "orders" created successfully.');
+
+    console.log('Creating sessions table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        token VARCHAR(64) PRIMARY KEY,
+        identifier VARCHAR(255) NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    console.log('Table "sessions" created successfully.');
   } catch (error) {
     console.error('Error creating table:', error);
   }
