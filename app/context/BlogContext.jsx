@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const BlogContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useBlog = () => useContext(BlogContext);
 
 export const BlogProvider = ({ children }) => {
@@ -19,7 +20,7 @@ export const BlogProvider = ({ children }) => {
                     const data = await response.json();
                     setIsAdmin(!!data.authenticated);
                 }
-            } catch (err) {
+            } catch {
                 // Ignore initial auth check failure silently
             }
         };
@@ -31,22 +32,21 @@ export const BlogProvider = ({ children }) => {
     }, []);
 
     // Fetch posts from API
-    const fetchPosts = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('/api/posts');
-            if (!response.ok) throw new Error('Failed to fetch posts');
-            const data = await response.json();
-            setPosts(data);
-        } catch (err) {
-            setError(err.message);
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const response = await fetch('/api/posts');
+                if (!response.ok) throw new Error('Failed to fetch posts');
+                const data = await response.json();
+                setPosts(data);
+            } catch (err) {
+                setError(err.message);
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchPosts();
     }, []);
 

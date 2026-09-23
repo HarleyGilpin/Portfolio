@@ -26,7 +26,7 @@ export default {
                 'outfit': ['Outfit', 'sans-serif'],
                 'space-grotesk': ['Space Grotesk', 'sans-serif'],
             },
-            typography: (theme) => ({
+            typography: () => ({
                 DEFAULT: {
                     css: {
                         color: 'var(--text-secondary)',

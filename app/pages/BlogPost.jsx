@@ -9,6 +9,19 @@ const BlogPost = () => {
     const { slug } = useParams();
     const { getPostBySlug, loading } = useBlog();
     const post = getPostBySlug(slug);
+    const [scrollProgress, setScrollProgress] = React.useState(0);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            const totalScroll = document.documentElement.scrollTop;
+            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scroll = `${totalScroll / windowHeight}`;
+            setScrollProgress(Number(scroll));
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     if (loading) {
         return (
@@ -28,19 +41,6 @@ const BlogPost = () => {
             ALLOWED_ATTR: ['href', 'target', 'src', 'alt', 'class', 'className', 'style', 'width', 'height', 'data-list']
         })
         : ''; // Safe fallback during SSR — content renders on hydration
-    const [scrollProgress, setScrollProgress] = React.useState(0);
-
-    React.useEffect(() => {
-        const handleScroll = () => {
-            const totalScroll = document.documentElement.scrollTop;
-            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scroll = `${totalScroll / windowHeight}`;
-            setScrollProgress(Number(scroll));
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     return (
         <div className="pt-4 pb-16 container mx-auto px-4 relative">

@@ -23,7 +23,14 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // `motion` is only referenced as <motion.div>, which core no-unused-vars can't see
+      'no-unused-vars': ['error', { varsIgnorePattern: '^([A-Z_]|motion$)' }],
+    },
+  },
+  {
+    files: ['api/**/*.js', 'tests/**/*.js', 'scripts/**/*.js', '*.config.js'],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ])

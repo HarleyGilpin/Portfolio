@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     try {
         // Verify the webhook signature
         event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    } catch (err) {
+    } catch {
         console.error('Webhook signature verification failed');
         return res.status(400).json({ error: 'Webhook signature verification failed' });
     }
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             await handleSubscriptionCanceled(event.data.object);
             break;
 
-        case 'customer.subscription.updated':
+        case 'customer.subscription.updated': {
             // Check if cancellation was just scheduled (Portal often sets cancel_at without checking cancel_at_period_end)
             const prev = event.data.previous_attributes;
             const session = event.data.object;
@@ -67,6 +67,7 @@ export default async function handler(req, res) {
                 }
             }
             break;
+        }
 
         case 'invoice.payment_failed':
             await handlePaymentFailed(event.data.object);

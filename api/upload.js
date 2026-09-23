@@ -28,7 +28,7 @@ export default async function handler(req, res) {
         const jsonResponse = await handleUpload({
             body,
             request: req,
-            onBeforeGenerateToken: async (pathname) => {
+            onBeforeGenerateToken: async () => {
                 return {
                     allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
                     maximumSizeInBytes: 10 * 1024 * 1024, // 10 MB limit
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
         });
 
         return res.status(200).json(jsonResponse);
-    } catch (error) {
+    } catch {
         console.error('Upload error:', { timestamp: new Date().toISOString() });
         return res.status(400).json({ error: 'Upload failed' });
     }
