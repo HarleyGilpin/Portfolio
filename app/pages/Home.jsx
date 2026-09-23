@@ -225,35 +225,38 @@ const Home = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
                         >
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[380px] md:h-[380px] bg-accent-secondary/25 rounded-full blur-[60px] -z-10" />
+                            {/* Wrapper sized to the photo so badges anchor to it, not the flex column */}
+                            <div className="relative">
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[310px] md:h-[310px] lg:w-[380px] lg:h-[380px] bg-accent-secondary/25 rounded-full blur-[60px] -z-10" />
 
-                            <div className="relative p-1 rounded-full gradient-rotate-border">
-                                <div className="rounded-full overflow-hidden bg-bg-primary w-[250px] h-[250px] md:w-[350px] md:h-[350px] border-4 border-bg-primary">
-                                    <img
-                                        src={ProfilePic}
-                                        alt="Harley Gilpin"
-                                        className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
-                                    />
+                                <div className="relative p-1 rounded-full gradient-rotate-border">
+                                    <div className="rounded-full overflow-hidden bg-bg-primary w-[250px] h-[250px] md:w-[280px] md:h-[280px] lg:w-[350px] lg:h-[350px] border-4 border-bg-primary">
+                                        <img
+                                            src={ProfilePic}
+                                            alt="Harley Gilpin"
+                                            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Floating badges */}
-                            <motion.div
-                                className="absolute -bottom-2 -left-2 md:left-4 glass-panel px-4 py-2 flex items-center gap-2 text-sm"
-                                animate={{ y: [0, -8, 0] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                            >
-                                <ShieldCheck size={18} className="text-accent-primary" />
-                                <span className="font-medium">CISA Certified</span>
-                            </motion.div>
-                            <motion.div
-                                className="absolute -top-2 -right-2 md:right-4 glass-panel px-4 py-2 flex items-center gap-2 text-sm"
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                            >
-                                <Code size={18} className="text-accent-secondary" />
-                                <span className="font-medium">Full Stack Dev</span>
-                            </motion.div>
+                                {/* Floating badges */}
+                                <motion.div
+                                    className="absolute bottom-2 -left-6 lg:bottom-6 lg:-left-8 glass-panel px-4 py-2 flex items-center gap-2 text-sm whitespace-nowrap"
+                                    animate={{ y: [0, -8, 0] }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                                >
+                                    <ShieldCheck size={18} className="text-accent-primary" />
+                                    <span className="font-medium">CISA Certified</span>
+                                </motion.div>
+                                <motion.div
+                                    className="absolute top-2 right-0 lg:top-6 glass-panel px-4 py-2 flex items-center gap-2 text-sm whitespace-nowrap"
+                                    animate={{ y: [0, -10, 0] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                                >
+                                    <Code size={18} className="text-accent-secondary" />
+                                    <span className="font-medium">Full Stack Dev</span>
+                                </motion.div>
+                            </div>
                         </motion.div>
                     </div>
                 </div>
