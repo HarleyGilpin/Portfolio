@@ -36,8 +36,8 @@ export default async function handler(req, res) {
         // Verify the webhook signature
         event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
-        return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+        console.error('Webhook signature verification failed');
+        return res.status(400).json({ error: 'Webhook signature verification failed' });
     }
 
     // Handle specific events
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
             break;
 
         default:
-            console.log(`Unhandled event type: ${event.type}`);
+            // Unhandled event type — no action required
     }
 
     return res.status(200).json({ received: true });
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
  * Notify when a user SCHEDULES a cancellation (e.g. at end of month)
  */
 async function handleSubscriptionUpdated(subscription) {
-    console.log('Subscription cancellation scheduled:', subscription.id);
+    // Subscription cancellation scheduled
 
     const orderId = subscription.metadata?.orderId;
     const hostingTier = subscription.metadata?.hostingTier || 'Unknown Tier';
@@ -104,7 +104,7 @@ async function handleSubscriptionUpdated(subscription) {
  * Alert Linear when a recurring payment fails
  */
 async function handlePaymentFailed(invoice) {
-    console.log('Payment failed:', invoice.id);
+    // Payment failure recorded
 
     const email = invoice.customer_email || 'Unknown Email';
     const amount = invoice.amount_due / 100; // Convert cents to dollars
@@ -178,7 +178,7 @@ async function createLinearIssue(title, description, priority = 2) {
         if (data.errors) {
             console.error('Linear API errors:', data.errors);
         } else {
-            console.log('Linear issue created:', data.data.issueCreate.issue.url);
+            // Linear issue created successfully
         }
     } catch (error) {
         console.error('Error creating Linear issue:', error);
@@ -189,7 +189,7 @@ async function createLinearIssue(title, description, priority = 2) {
  * Handle subscription cancellation
  */
 async function handleSubscriptionCanceled(subscription) {
-    console.log('Subscription canceled:', subscription.id);
+    // Subscription canceled
     const orderId = subscription.metadata?.orderId;
     const hostingTier = subscription.metadata?.hostingTier || 'Unknown Tier';
 
@@ -218,10 +218,10 @@ async function handleSubscriptionCanceled(subscription) {
 }
 
 async function handleCheckoutCompleted(session) {
-    console.log('Checkout completed:', session.id);
+    // Checkout completed
     const orderId = session.metadata?.orderId;
     if (!orderId) {
-        console.log('No orderId in session metadata');
+        console.error('Webhook: missing orderId in session metadata');
         return;
     }
 
@@ -234,7 +234,7 @@ async function handleCheckoutCompleted(session) {
             RETURNING *
         `;
 
-        console.log(`Order ${orderId} marked as paid`);
+        // Order marked as paid
 
         // 2. Create Linear Task for Onboarding
         if (result.rows.length > 0) {

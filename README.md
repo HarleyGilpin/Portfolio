@@ -23,7 +23,8 @@ The site automates core agency operations by connecting Stripe events directly t
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Vite, Tailwind CSS
+- **Frontend**: React 19, React Router v7 (Framework Mode), Tailwind CSS
+- **Architecture**: Static Site Generation (SSG) with SPA Fallback
 - **Backend**: Vercel Serverless Functions (Node.js)
 - **Database**: Neon (PostgreSQL) via `@vercel/postgres`
 - **Automation**: Stripe Webhooks -> Linear GraphQL API
@@ -80,6 +81,20 @@ npx vercel dev
 ```
 The application will be available at `http://localhost:3000`.
 
+To run the frontend only (for UI development):
+```bash
+npm run dev
+```
+
+### 5. Build for Production
+```bash
+npm run build
+```
+This generates static HTML files in `build/client/`. To preview the build locally:
+```bash
+npm run preview
+```
+
 ## 🚀 Deployment
 
 This project is optimized for deployment on **Vercel**.
@@ -87,7 +102,8 @@ This project is optimized for deployment on **Vercel**.
 1.  Push your code to GitHub.
 2.  Import the project into Vercel.
 3.  Add all **Environment Variables** in the Vercel Project Settings.
-4.  **Stripe Webhook Configuration**:
+4.  **Output Directory**: Ensure the Output Directory is set to `build/client` (or use the included `vercel.json`).
+5.  **Stripe Webhook Configuration**:
     - Add endpoint: `https://your-domain.com/api/stripe-webhook`
     - Events: `checkout.session.completed`, `customer.subscription.deleted`, `customer.subscription.updated`, `invoice.payment_failed`
 5.  Deploy!

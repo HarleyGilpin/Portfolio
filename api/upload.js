@@ -1,40 +1,46 @@
 import { handleUpload } from '@vercel/blob/client';
+import { requireAuth } from './_utils/verify-session.js';
+import { rateLimit } from './_utils/rate-limit.js';
+import { validateOrigin } from './_utils/csrf.js';
 
 export default async function handler(req, res) {
+    // CSRF protection
+    const csrf = validateOrigin(req);
+    if (!csrf.valid) {
+        return res.status(csrf.status).json(csrf.body);
+    }
+
+    // Rate limit: 10 uploads per minute per IP
+    const rl = rateLimit(req, { maxRequests: 10, windowMs: 60_000, keyPrefix: 'upload' });
+    if (rl.limited) {
+        return res.status(429).json(rl.body);
+    }
+
     const body = req.body;
 
-    // Security Check
-    const authHeader = req.query.auth;
-    const expectedAuth = process.env.VITE_ADMIN_PASSWORD;
-
-    console.log('Upload request received.');
-    console.log('Auth Header:', authHeader ? `Present (Length: ${authHeader.length})` : 'Missing');
-    console.log('Expected Auth:', expectedAuth ? `Present (Length: ${expectedAuth.length})` : 'Missing');
-
-    if (authHeader !== expectedAuth) {
-        console.error('Unauthorized upload attempt. Tokens do not match.');
-        return res.status(401).json({ error: 'Unauthorized' });
+    // Security Check — via header (no longer via query param)
+    const auth = await requireAuth(req);
+    if (!auth.authenticated) {
+        return res.status(auth.status).json(auth.body);
     }
 
     try {
-        console.log('Starting handleUpload...');
         const jsonResponse = await handleUpload({
             body,
             request: req,
             onBeforeGenerateToken: async (pathname) => {
-                console.log('Generating token for:', pathname);
                 return {
                     allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+                    maximumSizeInBytes: 10 * 1024 * 1024, // 10 MB limit
                     tokenPayload: JSON.stringify({}),
                     addRandomSuffix: true,
                 };
             },
         });
-        console.log('Upload successful:', jsonResponse);
 
         return res.status(200).json(jsonResponse);
     } catch (error) {
-        console.error('Server-side upload error:', error);
-        return res.status(400).json({ error: error.message });
+        console.error('Upload error:', { timestamp: new Date().toISOString() });
+        return res.status(400).json({ error: 'Upload failed' });
     }
 }
