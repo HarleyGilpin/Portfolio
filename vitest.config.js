@@ -7,7 +7,7 @@ export default defineConfig({
         globals: true,
         include: ['tests/**/*.test.{js,ts}'],
         alias: {
-            '@': path.resolve(__dirname, './app'),
+            '@': path.resolve(import.meta.dirname, './app'),
         },
     },
 });
