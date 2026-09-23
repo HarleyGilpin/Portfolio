@@ -1,10 +1,11 @@
 // No-op stub for react-quill-new during SSR pre-rendering.
 import React from "react";
 
-const ReactQuill = React.forwardRef(function ReactQuillNoop(_props, _ref) {
+const ReactQuill = React.forwardRef(function ReactQuillNoop() {
     return null;
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Quill = {
     register: () => { },
     import: () => ({}),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { motion } from 'framer-motion';
 import { FaLock, FaCreditCard, FaArrowRight, FaServer, FaRocket, FaCrown, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'sonner';
@@ -68,11 +68,10 @@ import SEO from '../components/SEO';
 
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays, subDays } from 'date-fns';
+import { addDays } from 'date-fns';
 
 const Checkout = () => {
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [blockedDates, setBlockedDates] = useState([]);
 

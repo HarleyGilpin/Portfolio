@@ -6,7 +6,6 @@ import {
     Scripts,
     ScrollRestoration,
 } from "react-router";
-import { ThemeProvider } from "./context/ThemeContext";
 import { BlogProvider } from "./context/BlogContext";
 import ClientToaster from "./components/ClientToaster";
 import "./index.css";
@@ -29,6 +28,7 @@ export function Layout({ children }) {
                     rel="stylesheet"
                 />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <meta name="theme-color" content="#0a0a0a" />
                 <Meta />
                 <Links />
             </head>
@@ -43,19 +43,17 @@ export function Layout({ children }) {
 
 export default function Root() {
     return (
-        <ThemeProvider>
-            <BlogProvider>
-                <ClientToaster />
-                <Outlet />
-            </BlogProvider>
-        </ThemeProvider>
+        <BlogProvider>
+            <ClientToaster />
+            <Outlet />
+        </BlogProvider>
     );
 }
 
 export function HydrateFallback() {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="flex items-center justify-center min-h-screen bg-bg-primary">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-primary"></div>
         </div>
     );
 }

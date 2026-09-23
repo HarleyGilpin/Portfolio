@@ -222,7 +222,7 @@ This Agreement is governed by the laws of the Provider's principal place of busi
 
         return res.status(200).json({ url: session.url });
 
-    } catch (error) {
+    } catch {
         console.error('Checkout API error:', { timestamp: new Date().toISOString() });
         return res.status(500).json({ error: 'Internal Server Error' });
     }

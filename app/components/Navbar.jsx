@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Menu, X, Code2 } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -44,7 +43,6 @@ const Navbar = () => {
                                 {link.name}
                             </Link>
                         ))}
-                        <ThemeToggle />
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -72,10 +70,6 @@ const Navbar = () => {
                                 {link.name}
                             </Link>
                         ))}
-                        <div className="flex items-center justify-between text-base font-medium text-text-secondary">
-                            <span>Theme</span>
-                            <ThemeToggle />
-                        </div>
                     </div>
                 </div>
             )}

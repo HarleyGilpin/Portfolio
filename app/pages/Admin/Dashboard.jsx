@@ -129,7 +129,7 @@ const Dashboard = () => {
                 hr: function () {
                     const cursorPosition = this.quill.getSelection().index;
                     this.quill.insertEmbed(cursorPosition, 'divider', true);
-                    this.quill.setSelection(cursorPosition + 1, Quill.sources.SILENT);
+                    this.quill.setSelection(cursorPosition + 1, 'silent');
                 },
                 image: function () {
                     const input = document.createElement('input');
