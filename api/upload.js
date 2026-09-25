@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     }
 
     // Rate limit: 10 uploads per minute per IP
-    const rl = rateLimit(req, { maxRequests: 10, windowMs: 60_000, keyPrefix: 'upload' });
+    const rl = await rateLimit(req, { maxRequests: 10, windowMs: 60_000, keyPrefix: 'upload' });
     if (rl.limited) {
         return res.status(429).json(rl.body);
     }

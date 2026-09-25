@@ -61,6 +61,26 @@ async function setup() {
       );
     `;
     console.log('Table "sessions" created successfully.');
+
+    console.log('Creating rate_limits table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS rate_limits (
+        key TEXT PRIMARY KEY,
+        count INTEGER NOT NULL,
+        reset_at TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+    `;
+    console.log('Table "rate_limits" created successfully.');
+
+    console.log('Creating stripe_events table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS stripe_events (
+        id VARCHAR(255) PRIMARY KEY,
+        type VARCHAR(255) NOT NULL,
+        processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    console.log('Table "stripe_events" created successfully.');
   } catch (error) {
     console.error('Error creating table:', error);
   }

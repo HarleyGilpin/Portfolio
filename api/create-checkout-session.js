@@ -27,6 +27,37 @@ const HOSTING_TIERS = {
 // Allowed origin for redirect URLs
 const ALLOWED_ORIGIN = process.env.SITE_URL || 'https://harleygilpin.com';
 
+const MAX_NAME_LENGTH = 100;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_DETAILS_LENGTH = 5000;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Validate free-text checkout fields. These end up in the database, the
+ * Stripe session, the service agreement, and Linear issues.
+ * Returns an error message, or null if valid.
+ */
+function validateInput({ clientName, clientEmail, projectDetails, deadline }) {
+    if (typeof clientName !== 'string' || !clientName.trim() || clientName.length > MAX_NAME_LENGTH) {
+        return 'Invalid client name';
+    }
+    if (typeof clientEmail !== 'string' || clientEmail.length > MAX_EMAIL_LENGTH || !EMAIL_PATTERN.test(clientEmail)) {
+        return 'Invalid email address';
+    }
+    if (projectDetails != null && (typeof projectDetails !== 'string' || projectDetails.length > MAX_DETAILS_LENGTH)) {
+        return 'Invalid project details';
+    }
+    if (deadline != null && deadline !== '') {
+        const date = new Date(`${deadline}T00:00:00Z`);
+        const today = new Date().toISOString().split('T')[0];
+        if (typeof deadline !== 'string' || !DATE_PATTERN.test(deadline) || isNaN(date.getTime()) || deadline < today) {
+            return 'Invalid deadline';
+        }
+    }
+    return null;
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -39,7 +70,7 @@ export default async function handler(req, res) {
     }
 
     // Rate limit: 10 checkout attempts per minute per IP
-    const rl = rateLimit(req, { maxRequests: 10, windowMs: 60_000, keyPrefix: 'checkout' });
+    const rl = await rateLimit(req, { maxRequests: 10, windowMs: 60_000, keyPrefix: 'checkout' });
     if (rl.limited) {
         return res.status(429).json(rl.body);
     }
@@ -52,15 +83,21 @@ export default async function handler(req, res) {
             projectDetails,
             deadline,
             hostingTier,
-        } = req.body;
+        } = req.body || {};
 
         // Input validation
         if (!tierId || !clientName || !clientEmail) {
             return res.status(400).json({ error: 'Missing required fields: tierId, clientName, clientEmail' });
         }
 
-        // Server-side tier lookup — never trust client-supplied price
-        const tier = TIERS[tierId];
+        const inputError = validateInput({ clientName, clientEmail, projectDetails, deadline });
+        if (inputError) {
+            return res.status(400).json({ error: inputError });
+        }
+
+        // Server-side tier lookup — never trust client-supplied price.
+        // Own-property check so keys like "constructor" don't resolve to Object.prototype.
+        const tier = Object.hasOwn(TIERS, tierId) ? TIERS[tierId] : null;
         if (!tier) {
             return res.status(400).json({ error: 'Invalid tier ID' });
         }
@@ -68,7 +105,7 @@ export default async function handler(req, res) {
         // Validate hosting tier if provided
         let hostingSelection = null;
         if (hostingTier && hostingTier !== 'none') {
-            hostingSelection = HOSTING_TIERS[hostingTier];
+            hostingSelection = Object.hasOwn(HOSTING_TIERS, hostingTier) ? HOSTING_TIERS[hostingTier] : null;
             if (!hostingSelection) {
                 return res.status(400).json({ error: 'Invalid hosting tier' });
             }

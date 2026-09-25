@@ -15,9 +15,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing session_id' });
     }
 
+    if (typeof session_id !== 'string' || !/^cs_[A-Za-z0-9_]{1,250}$/.test(session_id)) {
+        return res.status(400).json({ error: 'Invalid session_id' });
+    }
+
     // Rate limit: 20 verifications per minute per IP
     const { rateLimit } = await import('./_utils/rate-limit.js');
-    const rl = rateLimit(req, { maxRequests: 20, windowMs: 60_000, keyPrefix: 'verify-order' });
+    const rl = await rateLimit(req, { maxRequests: 20, windowMs: 60_000, keyPrefix: 'verify-order' });
     if (rl.limited) {
         return res.status(429).json(rl.body);
     }
@@ -38,56 +42,18 @@ export default async function handler(req, res) {
 
         const orderId = session.metadata.orderId;
 
-        // 2. Generate Agreement Text
-        // In a real app, this would be a robust PDF generation or complex template
-        const currentDate = new Date().toLocaleDateString();
-        const agreementText = `
-SERVICE AGREEMENT
-
-This Agreement is made on ${currentDate} between Harley Gilpin ("Provider") and the Client associated with Order #${orderId} ("Client").
-
-1. SERVICES
-Provider agrees to deliver the services described in the "${session.line_items?.data?.[0]?.description || 'Selected Tier'}" package.
-
-2. PAYMENT
-Client has paid a total of $${session.amount_total / 100} USD.
-
-3. RELATIONSHIP OF PARTIES
-Provider is an independent contractor. Nothing in this Agreement shall be construed to create a partnership, joint venture, or employer-employee relationship.
-
-4. INTELLECTUAL PROPERTY
-Upon full payment, Client shall own all rights, title, and interest in the final deliverables created specifically for Client. Provider retains ownership of any pre-existing materials, tools, or methodologies used.
-
-5. CONFIDENTIALITY
-(a) Definition: "Confidential Information" includes all non-public information disclosed by either party, including but not limited to: business plans, technical data, product ideas, trade secrets, customer lists, pricing information, login credentials, and proprietary methodologies.
-(b) Mutual Obligations: Both Provider and Client agree to hold each other's Confidential Information in strict confidence, using at least the same degree of care used to protect their own confidential information.
-(c) Exceptions: This obligation does not apply to information that: (i) was already publicly available, (ii) was independently developed without use of the other party's information, (iii) was lawfully received from a third party, or (iv) is required to be disclosed by law or court order.
-(d) Duration: These confidentiality obligations shall survive for two (2) years following the completion or termination of this Agreement.
-
-6. WARRANTIES & LIMITATION OF LIABILITY
-Provider warrants that Services will be performed in a professional manner. EXCEPT AS EXPRESSLY STATED, PROVIDER MAKES NO WARRANTIES, EXPRESS OR IMPLIED.
-TO THE FULLEST EXTENT PERMITTED BY LAW, PROVIDER'S TOTAL LIABILITY UNDER THIS AGREEMENT SHALL NOT EXCEED THE TOTAL FEES PAID BY CLIENT. PROVIDER SHALL NOT BE LIABLE FOR ANY INDIRECT, CONSEQUENTIAL, OR INCIDENTAL DAMAGES.
-
-7. TERMINATION
-Either party may terminate this Agreement if the other party materially breaches its terms.
-
-8. GOVERNING LAW
-This Agreement shall be governed by the laws of the Provider's principal place of business.
-
-9. ENTIRE AGREEMENT
-This document serves as the binding confirmation of the services and terms agreed to by the parties.
-    `.trim();
-
-        // 3. Update Order in Database — return only public-safe fields
+        // 2. Mark a pending order as paid. The service agreement was sealed at
+        // checkout and is never rewritten here, so revisiting this URL cannot
+        // alter the agreement or revert a later status (e.g. hosting_canceled).
         const { rows } = await sql`
       UPDATE orders 
-      SET status = 'paid', agreement_content = ${agreementText}
-      WHERE id = ${orderId} AND stripe_session_id = ${session_id}
+      SET status = 'paid'
+      WHERE id = ${orderId} AND stripe_session_id = ${session_id} AND status = 'pending'
       RETURNING id, tier_name, price, client_name, agreement_content, hosting_tier, hosting_price;
     `;
 
         if (rows.length === 0) {
-            // Only fetch if already 'paid'
+            // Already processed (e.g. by the webhook) — return the existing order
             const { rows: existingRows } = await sql`
                 SELECT id, tier_name, price, client_name, agreement_content, hosting_tier, hosting_price
                 FROM orders WHERE stripe_session_id = ${session_id}

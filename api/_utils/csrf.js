@@ -54,14 +54,16 @@ export function validateOrigin(req) {
         };
     }
 
-    // Allow localhost on any port (development)
-    try {
-        const url = new URL(requestOrigin);
-        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-            return { valid: true };
+    // Allow localhost on any port outside production (development)
+    if (process.env.VERCEL_ENV !== 'production') {
+        try {
+            const url = new URL(requestOrigin);
+            if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+                return { valid: true };
+            }
+        } catch {
+            // Invalid origin URL
         }
-    } catch {
-        // Invalid origin URL
     }
 
     if (ALLOWED_ORIGINS.includes(requestOrigin)) {

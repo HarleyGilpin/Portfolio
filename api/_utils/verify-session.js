@@ -73,25 +73,17 @@ export async function deleteSession(token) {
 /**
  * Verify the admin password using bcrypt.
  * Compares against the ADMIN_PASSWORD_HASH env var (bcrypt hash).
- * Falls back to ADMIN_PASSWORD (plaintext) for backward compatibility.
  */
 export async function verifyPassword(password) {
     if (!password) return false;
 
-    // Primary: bcrypt hash comparison
     const hash = process.env.ADMIN_PASSWORD_HASH;
-    if (hash) {
-        return bcrypt.compare(password, hash);
+    if (!hash) {
+        console.error('ADMIN_PASSWORD_HASH is not set; admin login is disabled');
+        return false;
     }
 
-    // Fallback: timing-safe plaintext comparison (legacy support)
-    const expected = process.env.ADMIN_PASSWORD;
-    if (!expected) return false;
-
-    const a = Buffer.from(password);
-    const b = Buffer.from(expected);
-    if (a.length !== b.length) return false;
-    return crypto.timingSafeEqual(a, b);
+    return bcrypt.compare(password, hash);
 }
 
 /**

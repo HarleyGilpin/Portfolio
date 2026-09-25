@@ -1,12 +1,31 @@
 /**
- * In-memory rate limiter for Vercel Serverless Functions.
+ * Rate limiter for Vercel Serverless Functions.
  *
- * Note: Each Vercel function invocation may run in a different isolate,
- * so this provides "best-effort" rate limiting within a single instance.
- * For stronger guarantees, use a Redis-backed solution (e.g., Upstash).
- * However, this is still effective because Vercel often reuses warm
- * instances for sequential requests.
+ * Counters live in Postgres so limits hold across function instances.
+ * If the database is unreachable, falls back to a per-instance in-memory
+ * counter so a DB outage degrades to best-effort limiting instead of none.
  */
+
+import { sql } from '@vercel/postgres';
+
+// Probability that a request also purges expired counters
+const CLEANUP_PROBABILITY = 0.01;
+
+let tableReady = null;
+
+function ensureTable() {
+    tableReady ??= sql`
+        CREATE TABLE IF NOT EXISTS rate_limits (
+            key TEXT PRIMARY KEY,
+            count INTEGER NOT NULL,
+            reset_at TIMESTAMP WITH TIME ZONE NOT NULL
+        )
+    `.catch((error) => {
+        tableReady = null; // Retry on the next request
+        throw error;
+    });
+    return tableReady;
+}
 
 const rateLimitStore = new Map();
 
@@ -21,7 +40,7 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 /**
- * Check rate limit for a given key.
+ * Check rate limit for a given key using the per-instance in-memory store.
  *
  * @param {string} key - Unique identifier (e.g., IP address or IP + route)
  * @param {object} options
@@ -56,8 +75,62 @@ export function checkRateLimit(key, { maxRequests = 10, windowMs = 60_000 } = {}
 }
 
 /**
+ * Check rate limit for a given key using a shared Postgres counter.
+ * The window resets atomically in a single upsert, so concurrent requests
+ * from different instances are counted correctly.
+ *
+ * @param {string} key
+ * @param {object} options
+ * @param {number} options.maxRequests
+ * @param {number} options.windowMs
+ * @returns {Promise<{ allowed: boolean, remaining: number, retryAfterMs: number }>}
+ */
+export async function checkRateLimitDb(key, { maxRequests = 10, windowMs = 60_000 } = {}) {
+    await ensureTable();
+
+    const resetAt = new Date(Date.now() + windowMs).toISOString();
+    const { rows } = await sql`
+        INSERT INTO rate_limits (key, count, reset_at)
+        VALUES (${key}, 1, ${resetAt})
+        ON CONFLICT (key)
+        DO UPDATE SET
+            count = CASE WHEN rate_limits.reset_at <= NOW() THEN 1 ELSE rate_limits.count + 1 END,
+            reset_at = CASE WHEN rate_limits.reset_at <= NOW() THEN EXCLUDED.reset_at ELSE rate_limits.reset_at END
+        RETURNING count, reset_at
+    `;
+
+    if (Math.random() < CLEANUP_PROBABILITY) {
+        sql`DELETE FROM rate_limits WHERE reset_at < NOW()`.catch(() => {});
+    }
+
+    const count = rows[0]?.count ?? 1;
+    if (count > maxRequests) {
+        return {
+            allowed: false,
+            remaining: 0,
+            retryAfterMs: Math.max(0, new Date(rows[0].reset_at) - Date.now()),
+        };
+    }
+
+    return { allowed: true, remaining: maxRequests - count, retryAfterMs: 0 };
+}
+
+/**
+ * Resolve the client IP. Vercel overwrites x-forwarded-for with the real
+ * client address, so the first entry is trustworthy there.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @returns {string}
+ */
+export function getClientIp(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+        || req.socket?.remoteAddress
+        || 'unknown';
+}
+
+/**
  * Express/Vercel middleware-style rate limiter.
- * Returns null if allowed, or a pre-built response object if blocked.
+ * Resolves to { limited: false } if allowed, or a pre-built response object if blocked.
  *
  * @param {import('http').IncomingMessage} req
  * @param {object} options
@@ -65,13 +138,16 @@ export function checkRateLimit(key, { maxRequests = 10, windowMs = 60_000 } = {}
  * @param {number} options.windowMs
  * @param {string} [options.keyPrefix] - Optional prefix for rate limit key
  */
-export function rateLimit(req, { maxRequests = 20, windowMs = 60_000, keyPrefix = '' } = {}) {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
-        || req.socket?.remoteAddress
-        || 'unknown';
+export async function rateLimit(req, { maxRequests = 20, windowMs = 60_000, keyPrefix = '' } = {}) {
+    const key = `${keyPrefix}:${getClientIp(req)}`;
 
-    const key = `${keyPrefix}:${ip}`;
-    const result = checkRateLimit(key, { maxRequests, windowMs });
+    let result;
+    try {
+        result = await checkRateLimitDb(key, { maxRequests, windowMs });
+    } catch {
+        console.error('Rate limit DB unavailable, using in-memory fallback');
+        result = checkRateLimit(key, { maxRequests, windowMs });
+    }
 
     if (!result.allowed) {
         return {

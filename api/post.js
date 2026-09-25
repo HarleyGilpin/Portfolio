@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
     // Rate limit: 30 reads or 10 writes per minute per IP
     const limit = req.method === 'GET' ? 30 : 10;
-    const rl = rateLimit(req, { maxRequests: limit, windowMs: 60_000, keyPrefix: 'post' });
+    const rl = await rateLimit(req, { maxRequests: limit, windowMs: 60_000, keyPrefix: 'post' });
     if (rl.limited) {
         return res.status(429).json(rl.body);
     }
