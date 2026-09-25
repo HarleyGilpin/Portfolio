@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Rate limiting has its own tests; stub it so it doesn't consume SQL mocks
+vi.mock('../../api/_utils/rate-limit.js', async (importOriginal) => ({
+    ...(await importOriginal()),
+    rateLimit: vi.fn().mockResolvedValue({ limited: false }),
+}));
+
 // Mock @vercel/postgres
 vi.mock('@vercel/postgres', () => ({
     sql: vi.fn(),

@@ -48,8 +48,9 @@ npm install
 Create a `.env` file in the root directory and add the following keys:
 
 ```properties
-# Admin Access
-VITE_ADMIN_PASSWORD=your_secure_password
+# Admin Access (server-only — never prefix with VITE_, that ships it to the browser)
+# Generate with: node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 12))" 'your_password'
+ADMIN_PASSWORD_HASH="$2b$12$..."
 
 # Database (Neon)
 POSTGRES_URL="postgres://..."

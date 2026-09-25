@@ -1,4 +1,11 @@
 {
+    "redirects": [
+        {
+            "source": "/security.txt",
+            "destination": "/.well-known/security.txt",
+            "permanent": true
+        }
+    ],
     "rewrites": [
         {
             "source": "/((?!api/.*|@.*|.*\\..*).*)",

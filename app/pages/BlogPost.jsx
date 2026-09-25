@@ -5,6 +5,14 @@ import SEO from '../components/SEO';
 import ShareButtons from '../components/ShareButtons';
 import DOMPurify from 'dompurify';
 
+// Links that open a new tab get rel="noopener noreferrer" so the opened page
+// can't navigate this one via window.opener (reverse tabnabbing).
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+        node.setAttribute('rel', 'noopener noreferrer');
+    }
+});
+
 const BlogPost = () => {
     const { slug } = useParams();
     const { getPostBySlug, loading } = useBlog();

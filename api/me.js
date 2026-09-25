@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     }
 
     // Light rate limiting for session checks
-    const rl = rateLimit(req, { maxRequests: 60, windowMs: 60_000, keyPrefix: 'me' });
+    const rl = await rateLimit(req, { maxRequests: 60, windowMs: 60_000, keyPrefix: 'me' });
     if (rl.limited) {
         return res.status(429).json(rl.body);
     }

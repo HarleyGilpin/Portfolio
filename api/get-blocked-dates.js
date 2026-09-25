@@ -8,18 +8,18 @@ export default async function handler(req, res) {
 
     // Rate limit: 30 fetches per minute per IP
     const { rateLimit } = await import('./_utils/rate-limit.js');
-    const rl = rateLimit(req, { maxRequests: 30, windowMs: 60_000, keyPrefix: 'blocked-dates' });
+    const rl = await rateLimit(req, { maxRequests: 30, windowMs: 60_000, keyPrefix: 'blocked-dates' });
     if (rl.limited) {
         return res.status(429).json(rl.body);
     }
 
     try {
-        // Fetch all deadlines from active orders
-        // Exclude Cancelled or Rejected orders
+        // Fetch deadlines from paid orders only. Unpaid 'pending' orders are
+        // excluded so anyone can't block the calendar by abandoning checkouts.
         const { rows } = await sql`
-            SELECT deadline 
-            FROM orders 
-            WHERE status NOT IN ('canceled', 'rejected', 'hosting_canceled')
+            SELECT deadline
+            FROM orders
+            WHERE status IN ('paid', 'onboarding_started')
             AND deadline IS NOT NULL
             AND deadline != ''
         `;

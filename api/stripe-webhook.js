@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { sql } from '@vercel/postgres';
+import { escapeMarkdown } from './_utils/markdown.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -11,6 +12,36 @@ export const config = {
         bodyParser: false, // Stripe requires raw body for signature verification
     },
 };
+
+let eventsTableReady = null;
+
+function ensureEventsTable() {
+    eventsTableReady ??= sql`
+        CREATE TABLE IF NOT EXISTS stripe_events (
+            id VARCHAR(255) PRIMARY KEY,
+            type VARCHAR(255) NOT NULL,
+            processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        )
+    `.catch((error) => {
+        eventsTableReady = null; // Retry on the next delivery
+        throw error;
+    });
+    return eventsTableReady;
+}
+
+/**
+ * Record an event ID. Returns false if it was already processed, since
+ * Stripe retries deliveries and would otherwise create duplicate Linear issues.
+ */
+async function claimEvent(event) {
+    await ensureEventsTable();
+    const { rows } = await sql`
+        INSERT INTO stripe_events (id, type) VALUES (${event.id}, ${event.type})
+        ON CONFLICT (id) DO NOTHING
+        RETURNING id
+    `;
+    return rows.length > 0;
+}
 
 // Buffer to collect raw body data
 function buffer(readable) {
@@ -40,41 +71,57 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Webhook signature verification failed' });
     }
 
-    // Handle specific events
-    switch (event.type) {
-        case 'checkout.session.completed':
-            await handleCheckoutCompleted(event.data.object);
-            break;
-
-        case 'customer.subscription.deleted':
-            await handleSubscriptionCanceled(event.data.object);
-            break;
-
-        case 'customer.subscription.updated': {
-            // Check if cancellation was just scheduled (Portal often sets cancel_at without checking cancel_at_period_end)
-            const prev = event.data.previous_attributes;
-            const session = event.data.object;
-
-            if (prev) {
-                const isCancellation =
-                    // Case A: Explicit flag
-                    ('cancel_at_period_end' in prev && session.cancel_at_period_end === true) ||
-                    // Case B: Cancel date set (from null)
-                    ('cancel_at' in prev && session.cancel_at !== null);
-
-                if (isCancellation) {
-                    await handleSubscriptionUpdated(session);
-                }
-            }
-            break;
+    try {
+        if (!(await claimEvent(event))) {
+            return res.status(200).json({ received: true, duplicate: true });
         }
+    } catch {
+        console.error('Webhook: failed to record event', { id: event.id, type: event.type });
+        return res.status(500).json({ error: 'Webhook processing failed' });
+    }
 
-        case 'invoice.payment_failed':
-            await handlePaymentFailed(event.data.object);
-            break;
+    try {
+        // Handle specific events
+        switch (event.type) {
+            case 'checkout.session.completed':
+                await handleCheckoutCompleted(event.data.object);
+                break;
 
-        default:
-            // Unhandled event type — no action required
+            case 'customer.subscription.deleted':
+                await handleSubscriptionCanceled(event.data.object);
+                break;
+
+            case 'customer.subscription.updated': {
+                // Check if cancellation was just scheduled (Portal often sets cancel_at without checking cancel_at_period_end)
+                const prev = event.data.previous_attributes;
+                const session = event.data.object;
+
+                if (prev) {
+                    const isCancellation =
+                        // Case A: Explicit flag
+                        ('cancel_at_period_end' in prev && session.cancel_at_period_end === true) ||
+                        // Case B: Cancel date set (from null)
+                        ('cancel_at' in prev && session.cancel_at !== null);
+
+                    if (isCancellation) {
+                        await handleSubscriptionUpdated(session);
+                    }
+                }
+                break;
+            }
+
+            case 'invoice.payment_failed':
+                await handlePaymentFailed(event.data.object);
+                break;
+
+            default:
+                // Unhandled event type — no action required
+        }
+    } catch {
+        console.error('Webhook: handler failed', { id: event.id, type: event.type });
+        // Release the claim so Stripe's retry is processed
+        await sql`DELETE FROM stripe_events WHERE id = ${event.id}`.catch(() => {});
+        return res.status(500).json({ error: 'Webhook processing failed' });
     }
 
     return res.status(200).json({ received: true });
@@ -95,7 +142,7 @@ async function handleSubscriptionUpdated(subscription) {
 
     await createLinearIssue(
         `Warning: Hosting Cancellation Scheduled - Order #${orderId || 'Unknown'}`,
-        `Client has requested cancellation effective on **${endDate}**.\n\nHosting Tier: ${hostingTier}\n\nTask: Prepare to offboard server on this date.`,
+        `Client has requested cancellation effective on **${endDate}**.\n\nHosting Tier: ${escapeMarkdown(hostingTier)}\n\nTask: Prepare to offboard server on this date.`,
         2 // High Priority
     );
 }
@@ -116,9 +163,9 @@ async function handlePaymentFailed(invoice) {
         `URGENT: Payment Failed - ${email} ($${amount})`,
         `**Revenue Alert**
         
-Client: ${email}
+Client: ${escapeMarkdown(email)}
 Amount Overdue: $${amount}
-Reason: ${invoice.billing_reason || 'Unknown'}
+Reason: ${escapeMarkdown(invoice.billing_reason || 'Unknown')}
 
 **Action Required:**
 1. Check Stripe Dashboard.
@@ -210,7 +257,7 @@ async function handleSubscriptionCanceled(subscription) {
         }
         await createLinearIssue(
             `URGENT: Hosting Canceled - Order #${orderId || 'Unknown'}`,
-            `User (${customerEmail}) has canceled their hosting subscription.\n\nHosting Tier: ${hostingTier}\nSubscription ID: ${subscription.id}\n\nPlease proceed with server offboarding.`,
+            `User (${escapeMarkdown(customerEmail)}) has canceled their hosting subscription.\n\nHosting Tier: ${escapeMarkdown(hostingTier)}\nSubscription ID: ${subscription.id}\n\nPlease proceed with server offboarding.`,
             1
         );
     } catch (error) {
@@ -241,14 +288,14 @@ async function handleCheckoutCompleted(session) {
         if (result.rows.length > 0) {
             const order = result.rows[0];
             const description = `
-**Client:** ${order.client_name}
-**Email:** ${order.client_email}
-**Service Tier:** ${order.tier_name}
-**Hosting:** ${order.hosting_tier || 'None'}
-**Deadline:** ${order.deadline || 'No specific date'}
+**Client:** ${escapeMarkdown(order.client_name)}
+**Email:** ${escapeMarkdown(order.client_email)}
+**Service Tier:** ${escapeMarkdown(order.tier_name)}
+**Hosting:** ${escapeMarkdown(order.hosting_tier || 'None')}
+**Deadline:** ${escapeMarkdown(order.deadline || 'No specific date')}
 
 **Project Details:**
-${order.project_details}
+${escapeMarkdown(order.project_details)}
 
 ---
 *Created via Stripe Webhook*
